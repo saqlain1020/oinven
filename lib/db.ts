@@ -1,5 +1,6 @@
 // This approach is taken from https://github.com/vercel/next.js/tree/canary/examples/with-mongodb
 import { MongoClient, ServerApiVersion } from "mongodb";
+import mongoose from "mongoose";
 
 if (!process.env.MONGODB_URI) {
   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
@@ -29,10 +30,12 @@ if (process.env.NODE_ENV === "development") {
     globalWithMongo._mongoClientPromise = client.connect();
   }
   clientPromise = globalWithMongo._mongoClientPromise;
+  mongoose.connect(uri, options);
 } else {
   // In production mode, it's best to not use a global variable.
   client = new MongoClient(uri, options);
   clientPromise = client.connect();
+  mongoose.connect(uri, options);
 }
 // Export a module-scoped MongoClient promise. By doing this in a
 // separate module, the client can be shared across functions.
