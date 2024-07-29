@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "src/config/theme";
+import PersistentDrawerLeft from "src/components/Drawer/Drawer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +27,9 @@ export default async function RootLayout({
       <html lang="en">
         <body className={inter.className}>
           <AppRouterCacheProvider>
-            <ThemeProvider theme={theme}>{children}</ThemeProvider>
+            <ThemeProvider theme={theme}>
+              <PersistentDrawerLeft>{children}</PersistentDrawerLeft>
+            </ThemeProvider>
           </AppRouterCacheProvider>
         </body>
       </html>
