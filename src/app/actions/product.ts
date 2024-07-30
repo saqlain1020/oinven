@@ -1,6 +1,6 @@
 "use server";
 
-import { sleep } from "src/utils/common";
+import { redirect } from "next/navigation";
 import Product from "../../../lib/models/Product";
 
 export async function createProduct(prev: any, formData: FormData) {
@@ -23,8 +23,8 @@ export async function createProduct(prev: any, formData: FormData) {
   });
   const product = new Product(obj);
   await product.save();
-  return product.toJSON();
-  // ...
+  redirect("/products");
+  // return product.toJSON();
 }
 
 export async function getProducts() {

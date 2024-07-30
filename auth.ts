@@ -76,10 +76,10 @@ const config = {
   callbacks: {
     async signIn({ user, account, profile, email, credentials }) {
       console.log("user =>", user.email);
-      let isAllowedToSignIn = false;
+      let isAllowedToSignIn = true;
       // @ts-ignore
       // const isAllowedToSignIn = credentials.username === "admin" && credentials.password === "admin";
-      isAllowedToSignIn = user.email === "saqlainprinters@gmail.com";
+      // isAllowedToSignIn = user.email === "saqlainprinters@gmail.com";
       if (isAllowedToSignIn) {
         return true;
       } else {
@@ -104,8 +104,8 @@ const config = {
       return token;
     },
     async session({ session, token }) {
-      let isAllowedToSignIn = false;
-      isAllowedToSignIn = session.user.email === "saqlainprinters@gmail.com";
+      let isAllowedToSignIn = true;
+      // isAllowedToSignIn = session.user.email === "saqlainprinters@gmail.com";
       if (!isAllowedToSignIn) throw new Error("Unauthorized!");
 
       if (token?.accessToken) {

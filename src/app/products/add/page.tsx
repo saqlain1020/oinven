@@ -63,7 +63,7 @@ export default function AddProduct() {
             onChange={(e) => setCategory(e.target.value as ProductCategory)}
           >
             {Object.entries(ProductCategory).map(([key, value]) => (
-              <MenuItem value={value}>{key}</MenuItem>
+              <MenuItem key={key} value={value}>{key}</MenuItem>
             ))}
           </TextField>
         </Grid>
