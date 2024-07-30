@@ -17,6 +17,7 @@
     "@mui/lab": "^5.0.0-alpha.173",
     "@mui/material": "^5.16.5",
     "@mui/material-nextjs": "^5.16.4",
+    "@mui/x-data-grid": "^7.11.1",
     "@mui/x-date-pickers": "^7.11.1",
     "moment": "^2.30.1",
     "mongodb": "^6.8.0",

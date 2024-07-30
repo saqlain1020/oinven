@@ -2,6 +2,7 @@
 
 import { redirect } from "next/navigation";
 import Product from "../../../lib/models/Product";
+import { revalidatePath } from "next/cache";
 
 export async function createProduct(prev: any, formData: FormData) {
   let obj = {
@@ -27,9 +28,18 @@ export async function createProduct(prev: any, formData: FormData) {
   // return product.toJSON();
 }
 
+export async function deleteProduct(prev: any, _id: string) {
+  await Product.findByIdAndDelete(_id);
+  revalidatePath("/products");
+}
+
+export async function getProduct(_id: string) {
+  const prod = await Product.findById(_id);
+  return prod?.toJSON();
+}
+
 export async function getProducts() {
   const items = await Product.find().lean();
 
-  console.log("items =>", items);
   return items;
 }

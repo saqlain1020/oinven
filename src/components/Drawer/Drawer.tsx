@@ -97,7 +97,7 @@ const routes = [
 // @ts-expect-error
 export default function PersistentDrawerLeft({ children }) {
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = React.useState(true);
   const pathname = usePathname();
   const handleDrawerOpen = () => {
     setOpen(true);

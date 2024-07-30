@@ -1,5 +1,6 @@
 import { Box, Container, Typography } from "@mui/material";
 import { getProducts } from "../actions/product";
+import ProductsTable from "src/components/ProductsTable/ProductsTable";
 
 export default async function Products() {
   const items = await getProducts();
@@ -9,9 +10,11 @@ export default async function Products() {
         <Typography variant="h4" fontWeight={"bold"}>
           Products
         </Typography>
-        {items.map((item, i) => (
+        <ProductsTable data={items} />
+
+        {/* {items.map((item, i) => (
           <Typography key={i}>{item.name}</Typography>
-        ))}
+        ))} */}
       </Container>
     </Box>
   );
