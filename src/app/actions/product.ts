@@ -1,11 +1,11 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import Product from "../../../lib/models/Product";
+import Product, { IProductPopulated } from "../../../lib/models/Product";
 import { revalidatePath } from "next/cache";
 import Customer from "../../../lib/models/Customer";
 
-export async function createProduct(prev: any, formData: FormData) {
+export async function createOrUpdateProduct(prev: any, formData: FormData) {
   let obj = {
     attributes: [] as { name: string; value: string }[],
   } as {
@@ -24,6 +24,8 @@ export async function createProduct(prev: any, formData: FormData) {
     // not in form data
     boughtFrom?: string;
     soldTo?: string;
+    // Only if editing
+    productId?: string;
   };
   formData.forEach((value, key) => {
     if (key.split(".")[0] === "attributes") {
@@ -59,11 +61,15 @@ export async function createProduct(prev: any, formData: FormData) {
     }
     obj.soldTo = soldTo!._id;
   }
-
-  const product = new Product(obj);
-  await product.save();
-  redirect("/products");
-  // return product.toJSON();
+  if (obj.productId) {
+    const product = await Product.findOneAndUpdate({ _id: obj.productId }, obj, { new: true });
+    revalidatePath("/products/edit/" + obj.productId);
+    return product!.toJSON();
+  } else {
+    const product = new Product(obj);
+    await product.save();
+    redirect("/products");
+  }
 }
 
 export async function deleteProduct(prev: any, _id: string) {
@@ -73,11 +79,11 @@ export async function deleteProduct(prev: any, _id: string) {
 
 export async function getProduct(_id: string) {
   const prod = await Product.findById(_id);
-  return prod?.toJSON();
+  return prod?.toJSON() as IProductPopulated;
 }
 
 export async function getProducts() {
-  const items = await Product.find().lean();
+  const items = await Product.find().sort("-updatedAt").lean();
 
   return items;
 }

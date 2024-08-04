@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import { AttributesOptions, ProductCategory } from "src/types/product";
 import { DatePicker } from "@mui/x-date-pickers";
+import moment from "moment";
 import React, { useState } from "react";
 import { Delete, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -21,10 +22,10 @@ import { useFormState, useFormStatus } from "react-dom";
 import { createOrUpdateProduct } from "src/app/actions/product";
 
 import { IMaskInput } from "react-imask";
+import { IProductPopulated } from "../../../../../../lib/models/Product";
 
-export default function AddProduct() {
-  const [category, setCategory] = useState(ProductCategory.Phone);
-  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([{ name: "Imei", value: "" }]);
+const EditPageComp: React.FC<{ product: IProductPopulated }> = ({ product }) => {
+  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>(product.attributes);
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
 
   const handleAddAttribute = () => {
@@ -45,7 +46,10 @@ export default function AddProduct() {
     <Box
       component={"form"}
       //  onSubmit={handleSubmit}
-      action={formAction}
+      action={(data) => {
+        data.append("productId", product._id);
+        formAction(data);
+      }}
     >
       <Typography variant="h5" fontWeight={600}>
         Product Details
@@ -53,19 +57,12 @@ export default function AddProduct() {
       <Grid container spacing={3} sx={{ mt: 1 }}>
         {/* Name */}
         <Grid item xs={12} sm={6}>
-          <TextField name="name" fullWidth label="Name" required />
+          <TextField name="name" defaultValue={product.name} fullWidth label="Name" required />
         </Grid>
 
         {/* Category */}
         <Grid item xs={12} sm={6}>
-          <TextField
-            name="category"
-            fullWidth
-            select
-            label="Category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value as ProductCategory)}
-          >
+          <TextField name="category" fullWidth select label="Category" defaultValue={product.category}>
             {Object.entries(ProductCategory).map(([key, value]) => (
               <MenuItem key={key} value={value}>
                 {key}
@@ -76,7 +73,14 @@ export default function AddProduct() {
 
         {/* Description */}
         <Grid item xs={12}>
-          <TextField multiline name="description" fullWidth rows={3} label="Description" />
+          <TextField
+            multiline
+            defaultValue={product.description}
+            name="description"
+            fullWidth
+            rows={3}
+            label="Description"
+          />
         </Grid>
         {/* Attributes */}
         <Grid item xs={12}>
@@ -125,7 +129,7 @@ export default function AddProduct() {
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField name="buyingPhone" fullWidth label="Phone" />
+          <TextField name="buyingPhone" defaultValue={product.boughtFrom?.phone} fullWidth label="Phone" />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
@@ -134,9 +138,8 @@ export default function AddProduct() {
             </InputLabel>
             <OutlinedInput
               fullWidth
+              defaultValue={product.boughtFrom?.nic}
               name="buyingNic"
-              // value={values.textmask}
-              // onChange={handleChange}
               id="formatted-text-mask-input"
               inputComponent={TextMaskCustom as any}
             />
@@ -144,11 +147,16 @@ export default function AddProduct() {
         </Grid>
         {/* Bought At */}
         <Grid item xs={12} sm={6}>
-          <DatePicker name="boughtAt" label="Buying Date" sx={{ width: "100%" }} />
+          <DatePicker
+            defaultValue={product.boughtAt ? moment(product.boughtAt) : undefined}
+            name="boughtAt"
+            label="Buying Date"
+            sx={{ width: "100%" }}
+          />
         </Grid>
         {/* Buy Price */}
         <Grid item xs={12} sm={6}>
-          <TextField name="buyPrice" fullWidth label="Buying Price" type="number" />
+          <TextField name="buyPrice" defaultValue={product.buyPrice} fullWidth label="Buying Price" type="number" />
         </Grid>
         {/* Sell Section */}
         <Grid item xs={12}>
@@ -157,7 +165,7 @@ export default function AddProduct() {
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField name="sellingPhone" fullWidth label="Phone" />
+          <TextField name="sellingPhone" defaultValue={product.soldTo?.phone} fullWidth label="Phone" />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
@@ -166,8 +174,7 @@ export default function AddProduct() {
             </InputLabel>
             <OutlinedInput
               fullWidth
-              // value={values.textmask}
-              // onChange={handleChange}
+              defaultValue={product.soldTo?.nic}
               name="sellingNic"
               id="formatted-text-mask-input"
               inputComponent={TextMaskCustom as any}
@@ -175,24 +182,32 @@ export default function AddProduct() {
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <DatePicker name="solAt" label="Sell Date" sx={{ width: "100%" }} />
+          <DatePicker
+            name="soldAt"
+            defaultValue={product.soldAt ? moment(product.soldAt) : undefined}
+            label="Sell Date"
+            sx={{ width: "100%" }}
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField name="sellPrice" fullWidth label="Sell Price" type="number" />
+          <TextField name="sellPrice" defaultValue={product.sellPrice} fullWidth label="Sell Price" type="number" />
         </Grid>
         <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
+          -
           <SubmitButton />
         </Grid>
       </Grid>
     </Box>
   );
-}
+};
+
+export default EditPageComp;
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <LoadingButton loading={pending} type="submit" loadingPosition="start" startIcon={<Save />} variant="contained">
-      Save Product
+      Save Changes
     </LoadingButton>
   );
 }

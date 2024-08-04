@@ -58,10 +58,10 @@ const columns = [
     flex: 1,
   },
   {
-    field: "info",
+    field: "imei",
     sortable: true,
     minWidth: 100,
-    headerName: "Info",
+    headerName: "Imei",
     valueFormatter: (v?: any) => (v ? v : "-"),
     flex: 1,
   },
@@ -77,7 +77,7 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
       const info = imei ? imei : undefined;
       return {
         ...item,
-        info,
+        imei: info,
       };
     });
   }, [data]);
@@ -92,9 +92,9 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
         // checkboxSelection
         // loading
         getRowId={(row) => row._id}
-        onRowClick={(params) => {
-          router.push(`products/${params.row._id}`);
-        }}
+        // onRowClick={(params) => {
+        //   router.push(`products/${params.row._id}`);
+        // }}
         rows={rows}
         columns={[
           ...columns,
@@ -108,7 +108,12 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
               return (
                 <Box>
                   {!isSold && (
-                    <Button variant="outlined" size="small" sx={{ minWidth: 0, minHeight: 0 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ minWidth: 0, minHeight: 0 }}
+                      onClick={() => router.push(`products/edit/${params.row._id}`)}
+                    >
                       Sell
                     </Button>
                   )}

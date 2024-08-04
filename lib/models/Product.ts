@@ -12,10 +12,15 @@ export interface IProduct extends Document {
   buyPrice: number;
   sellPrice: number;
   createdAt: string;
-  soldTo?: mongoose.Schema.Types.ObjectId | ICustomer;
-  boughtFrom?: mongoose.Schema.Types.ObjectId | ICustomer;
+  soldTo?: mongoose.Schema.Types.ObjectId;
+  boughtFrom?: mongoose.Schema.Types.ObjectId;
   updatedAt: string;
   _id: string;
+}
+
+export interface IProductPopulated extends Omit<IProduct, "soldTo" | "boughtFrom"> {
+  soldTo?: ICustomer;
+  boughtFrom?: ICustomer;
 }
 
 const productSchema = new mongoose.Schema<IProduct>(
