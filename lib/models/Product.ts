@@ -1,5 +1,6 @@
 import mongoose, { Model, Document } from "mongoose";
 import { ProductCategory } from "src/types/product";
+import Customer, { ICustomer } from "./Customer";
 
 export interface IProduct extends Document {
   name: string;
@@ -11,6 +12,8 @@ export interface IProduct extends Document {
   buyPrice: number;
   sellPrice: number;
   createdAt: string;
+  soldTo?: mongoose.Schema.Types.ObjectId | ICustomer;
+  boughtFrom?: mongoose.Schema.Types.ObjectId | ICustomer;
   updatedAt: string;
   _id: string;
 }
@@ -40,6 +43,14 @@ const productSchema = new mongoose.Schema<IProduct>(
     },
     sellPrice: {
       type: Number,
+    },
+    boughtFrom: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Customer,
+    },
+    soldTo: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Customer,
     },
     attributes: {
       type: [
@@ -76,11 +87,13 @@ const productSchema = new mongoose.Schema<IProduct>(
 // };
 
 // Add a pre find middleware to populate the referrer field
-// accountSchema.pre(/^find/, function (next) {
-//   // @ts-ignore
-//   this.populate("referrer");
-//   next();
-// });
+productSchema.pre(/^find/, function (next) {
+  // @ts-ignore
+  this.populate("soldTo");
+  // @ts-ignore
+  this.populate("boughtFrom");
+  next();
+});
 
 // var Product = mongoose.model("Product", productSchema);
 const Product: Model<IProduct> = mongoose.models.Product || mongoose.model<IProduct>("Product", productSchema);

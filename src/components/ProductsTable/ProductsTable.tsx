@@ -1,10 +1,10 @@
 "use client";
-import { Box, IconButton } from "@mui/material";
+import { Box, Button, IconButton } from "@mui/material";
 import React, { useMemo } from "react";
 import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import { deleteProduct, getProducts } from "src/app/actions/product";
 import moment from "moment";
-import { Delete } from "@mui/icons-material";
+import { Delete, Edit } from "@mui/icons-material";
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
 
@@ -101,12 +101,24 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
           {
             headerName: "Actions",
             field: "",
+            width: 130,
             align: "center",
             renderCell(params) {
+              const isSold = !!params.row.soldAt;
               return (
-                <IconButton onClick={() => formAction(params.row._id)}>
-                  <Delete fontSize="small" />
-                </IconButton>
+                <Box>
+                  {!isSold && (
+                    <Button variant="outlined" size="small" sx={{ minWidth: 0, minHeight: 0 }}>
+                      Sell
+                    </Button>
+                  )}
+                  <IconButton size="small" onClick={() => router.push(`products/edit/${params.row._id}`)}>
+                    <Edit fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => formAction(params.row._id)}>
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Box>
               );
             },
           },

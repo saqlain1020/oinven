@@ -6,16 +6,14 @@ export default async function Products() {
   const items = await getProducts();
   return (
     <Box>
-      <Container>
-        <Typography variant="h4" fontWeight={"bold"}>
-          Products
-        </Typography>
-        <ProductsTable data={items} />
+      <Typography variant="h4" fontWeight={"bold"}>
+        Products
+      </Typography>
+      <ProductsTable data={items} />
 
-        {/* {items.map((item, i) => (
+      {/* {items.map((item, i) => (
           <Typography key={i}>{item.name}</Typography>
         ))} */}
-      </Container>
     </Box>
   );
 }

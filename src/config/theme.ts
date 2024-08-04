@@ -21,6 +21,13 @@ const theme = createTheme({
         maxWidth: "xl",
       },
     },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+        },
+      },
+    },
   },
 });
 
