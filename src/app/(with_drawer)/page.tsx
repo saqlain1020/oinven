@@ -10,7 +10,6 @@ const sxStyles = makeStyles((theme) => ({
 
 export default async function Home() {
   const data = await generateDashboardData();
-  console.log("data =>", data);
   return (
     <Box component={"main"}>
       <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -78,4 +77,5 @@ export default async function Home() {
     </Box>
   );
 }
+
 

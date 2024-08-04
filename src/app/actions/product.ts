@@ -85,7 +85,7 @@ export async function getProduct(_id: string) {
 export async function getProducts() {
   const items = await Product.find().sort("-updatedAt").lean();
 
-  return items;
+  return items.map((item) => ({ ...item, _id: item._id.toString() }));
 }
 
 export async function generateDashboardData() {
