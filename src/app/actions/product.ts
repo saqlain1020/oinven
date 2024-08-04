@@ -87,3 +87,133 @@ export async function getProducts() {
 
   return items;
 }
+
+export async function generateDashboardData() {
+  let data: any;
+  let result = {
+    totalBoughtAmount: 0,
+    totalSoldAmount: 0,
+    currentMonthBought: 0,
+    currentMonthSold: 0,
+    currentYearBought: 0,
+    currentYearSold: 0,
+  };
+
+  data = await Product.aggregate<{
+    totalBoughtAmount: number;
+    totalSoldAmount: number;
+  }>([
+    {
+      $match: {},
+    },
+    {
+      $group: {
+        _id: null,
+        totalBoughtAmount: {
+          $sum: "$buyPrice",
+        },
+        totalSoldAmount: {
+          $sum: "$sellPrice",
+        },
+      },
+    },
+  ]);
+  if (data.length > 0) {
+    result.totalBoughtAmount = data[0].totalBoughtAmount;
+    result.totalSoldAmount = data[0].totalSoldAmount;
+  }
+  data = await Product.aggregate<{
+    totalBoughtAmount: number;
+  }>([
+    {
+      $match: {
+        boughtAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalBoughtAmount: {
+          $sum: "$buyPrice",
+        },
+      },
+    },
+  ]);
+  if (data.length > 0) {
+    result.currentMonthBought = data[0].totalBoughtAmount;
+  }
+  data = await Product.aggregate<{
+    totalSoldAmount: number;
+  }>([
+    {
+      $match: {
+        soldAt: {
+          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+          $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalSoldAmount: {
+          $sum: "$sellPrice",
+        },
+      },
+    },
+  ]);
+  if (data.length > 0) {
+    result.currentMonthSold = data[0].totalSoldAmount;
+  }
+
+  data = await Product.aggregate<{
+    totalBoughtAmount: number;
+  }>([
+    {
+      $match: {
+        boughtAt: {
+          $gte: new Date(new Date().getFullYear(), 0, 1),
+          $lt: new Date(new Date().getFullYear() + 1, 0, 1),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalBoughtAmount: {
+          $sum: "$buyPrice",
+        },
+      },
+    },
+  ]);
+  if (data.length > 0) {
+    result.currentYearBought = data[0].totalBoughtAmount;
+  }
+  data = await Product.aggregate<{
+    totalSoldAmount: number;
+  }>([
+    {
+      $match: {
+        soldAt: {
+          $gte: new Date(new Date().getFullYear(), 0, 1),
+          $lt: new Date(new Date().getFullYear() + 1, 0, 1),
+        },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        totalSoldAmount: {
+          $sum: "$sellPrice",
+        },
+      },
+    },
+  ]);
+  if (data.length > 0) {
+    result.currentYearSold = data[0].totalSoldAmount;
+  }
+  return result;
+}

@@ -175,7 +175,7 @@ export default function AddProduct() {
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <DatePicker name="solAt" label="Sell Date" sx={{ width: "100%" }} />
+          <DatePicker name="soldAt" label="Sell Date" sx={{ width: "100%" }} />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField name="sellPrice" fullWidth label="Sell Price" type="number" />

@@ -78,7 +78,7 @@ const DrawerHeader = styled("div")(({ theme }) => ({
 
 const routes = [
   {
-    name: "Home",
+    name: "Dashboard",
     path: "/",
     icon: <HomeIcon />,
   },

@@ -193,7 +193,6 @@ const EditPageComp: React.FC<{ product: IProductPopulated }> = ({ product }) => 
           <TextField name="sellPrice" defaultValue={product.sellPrice} fullWidth label="Sell Price" type="number" />
         </Grid>
         <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
-          -
           <SubmitButton />
         </Grid>
       </Grid>

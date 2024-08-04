@@ -1,14 +1,14 @@
 "use client";
-import { Box, Button, IconButton } from "@mui/material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import React, { useMemo } from "react";
-import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
 import { deleteProduct, getProducts } from "src/app/actions/product";
 import moment from "moment";
-import { Delete, Edit } from "@mui/icons-material";
+import { Delete, Edit, RemoveRedEye } from "@mui/icons-material";
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
 
-const columns = [
+const columns: GridColDef[] = [
   {
     field: "name",
     sortable: true,
@@ -28,12 +28,22 @@ const columns = [
     sortable: true,
     minWidth: 100,
     headerName: "Bought At",
-    valueFormatter: (v: string) => moment(v).calendar(),
+    valueFormatter: (v: string) => (v ? moment(v).fromNow() : "-"),
     flex: 1,
+    renderCell(params) {
+      return (
+        <Box className="center" sx={{ height: "100%" }}>
+          <Tooltip placement="top" title={moment(params.value).format("DD-MMM-YYYY")}>
+            <Typography sx={{ fontSize: 14 }}>{params.formattedValue}</Typography>
+          </Tooltip>
+        </Box>
+      );
+    },
   },
   {
     field: "buyPrice",
     sortable: true,
+    cellClassName: "red",
     minWidth: 100,
     headerName: "Buy Price",
     valueFormatter: (v?: number) => (v ? Number(v).toLocaleString() : "-"),
@@ -45,12 +55,22 @@ const columns = [
     sortable: true,
     minWidth: 100,
     headerName: "Sold At",
-    valueFormatter: (v: string) => (v ? moment(v).calendar() : "-"),
+    valueFormatter: (v: string) => (v ? moment(v).fromNow() : "-"),
     flex: 1,
+    renderCell(params) {
+      return (
+        <Box className="center" sx={{ height: "100%" }}>
+          <Tooltip placement="top" title={moment(params.value).format("DD-MMM-YYYY")}>
+            <Typography sx={{ fontSize: 14 }}>{params.formattedValue}</Typography>
+          </Tooltip>
+        </Box>
+      );
+    },
   },
   {
     field: "sellPrice",
     sortable: true,
+    cellClassName: "green",
     minWidth: 100,
     headerName: "Sell Price",
     valueFormatter: (v?: number) => (v ? Number(v).toLocaleString() : "-"),
@@ -62,7 +82,7 @@ const columns = [
     sortable: true,
     minWidth: 100,
     headerName: "Imei",
-    valueFormatter: (v?: any) => (v ? v : "-"),
+    valueFormatter: (v?: any) => (v ? v.slice(0, 3) + "..." + v.slice(-3) : "-"),
     flex: 1,
   },
 ];
@@ -101,7 +121,7 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
           {
             headerName: "Actions",
             field: "",
-            width: 130,
+            width: 150,
             align: "center",
             renderCell(params) {
               const isSold = !!params.row.soldAt;
@@ -117,6 +137,9 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
                       Sell
                     </Button>
                   )}
+                  <IconButton size="small" onClick={() => router.push(`products/${params.row._id}`)}>
+                    <RemoveRedEye fontSize="small" />
+                  </IconButton>
                   <IconButton size="small" onClick={() => router.push(`products/edit/${params.row._id}`)}>
                     <Edit fontSize="small" />
                   </IconButton>

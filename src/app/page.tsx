@@ -1,7 +1,6 @@
-import Image from "next/image";
-import styles from "./page.module.css";
-import { Button } from "@mui/material";
+import { Box, Card, Grid, Typography } from "@mui/material";
 import { makeStyles } from "src/hooks/useSxStyles";
+import { generateDashboardData } from "./actions/product";
 
 const sxStyles = makeStyles((theme) => ({
   root: {
@@ -9,84 +8,74 @@ const sxStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function Home() {
+export default async function Home() {
+  const data = await generateDashboardData();
+  console.log("data =>", data);
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <Button sx={sxStyles.root} variant="contained">
-          Hello
-        </Button>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{" "}
-            <Image src="/vercel.svg" alt="Vercel Logo" className={styles.vercelLogo} width={100} height={24} priority />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image className={styles.logo} src="/next.svg" alt="Next.js Logo" width={180} height={37} priority />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore starter templates for Next.js.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>Instantly deploy your Next.js site to a shareable URL with Vercel.</p>
-        </a>
-      </div>
-    </main>
+    <Box component={"main"}>
+      <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Total Sold
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {data.totalSoldAmount.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Total Bought
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {data.totalBoughtAmount.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              This Month Sold
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {data.currentMonthSold.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              This Month Bought
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {data.currentMonthBought.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              This Year Bought
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {data.currentYearSold.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              This Year Bought
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {data.currentYearBought.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
   );
 }
-
 
