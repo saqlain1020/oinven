@@ -25,6 +25,8 @@ import AddIcon from "@mui/icons-material/Add";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutIcon from "@mui/icons-material/Logout";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+
 const drawerWidth = 240;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -91,6 +93,11 @@ const routes = [
     name: "Add Product",
     path: "/products/add",
     icon: <AddIcon />,
+  },
+  {
+    name: "Manage Users",
+    path: "/manage_users",
+    icon: <ManageAccountsIcon />,
   },
 ];
 

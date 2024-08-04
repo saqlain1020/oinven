@@ -33,6 +33,7 @@ import Resend from "next-auth/providers/resend";
 import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import clientPromise from "./lib/db";
 import CredentialsProvider from "next-auth/providers/credentials";
+import AllowedUser from "./lib/models/AllowedUsers";
 
 const config = {
   theme: { logo: "https://authjs.dev/img/logo-sm.png" },
@@ -77,9 +78,10 @@ const config = {
     async signIn({ user, account, profile, email, credentials }) {
       console.log("user =>", user.email);
       let isAllowedToSignIn = true;
+      const dbUser = await AllowedUser.findOne({ email: user.email }).lean();
       // @ts-ignore
       // const isAllowedToSignIn = credentials.username === "admin" && credentials.password === "admin";
-      // isAllowedToSignIn = user.email === "saqlainprinters@gmail.com";
+      isAllowedToSignIn = !!dbUser;
       if (isAllowedToSignIn) {
         return true;
       } else {
@@ -105,6 +107,10 @@ const config = {
     },
     async session({ session, token }) {
       let isAllowedToSignIn = true;
+      // const dbUser = await AllowedUser.findOne({ email: session.user.email }).lean();
+      // console.log("dbUser =>", dbUser);
+      // isAllowedToSignIn = !!dbUser;
+
       // isAllowedToSignIn = session.user.email === "saqlainprinters@gmail.com";
       if (!isAllowedToSignIn) throw new Error("Unauthorized!");
 
