@@ -1,5 +1,5 @@
 import { Box, Container, Typography } from "@mui/material";
-import { getProducts } from "../actions/product";
+import { getProducts } from "../../actions/product";
 import ProductsTable from "src/components/ProductsTable/ProductsTable";
 
 export default async function Products() {

@@ -20,9 +20,10 @@ import { Delete, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { useFormState, useFormStatus } from "react-dom";
 import { createOrUpdateProduct } from "src/app/actions/product";
+import Link from "next/link";
 
 import { IMaskInput } from "react-imask";
-import { IProductPopulated } from "../../../../../../lib/models/Product";
+import { IProductPopulated } from "../../../../../../../lib/models/Product";
 
 const EditPageComp: React.FC<{ product: IProductPopulated }> = ({ product }) => {
   const [attributes, setAttributes] = useState<{ name: string; value: string }[]>(product.attributes);
@@ -192,7 +193,23 @@ const EditPageComp: React.FC<{ product: IProductPopulated }> = ({ product }) => 
         <Grid item xs={12} sm={6}>
           <TextField name="sellPrice" defaultValue={product.sellPrice} fullWidth label="Sell Price" type="number" />
         </Grid>
-        <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
+        <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
+          <Button
+            variant="outlined"
+            color="primary"
+            LinkComponent={Link}
+            href={`/products/receipt/${product._id}/sell`}
+          >
+            Generate Sale Receipt
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            LinkComponent={Link}
+            href={`/products/receipt/${product._id}/buy`}
+          >
+            Generate Buy Receipt
+          </Button>
           <SubmitButton />
         </Grid>
       </Grid>

@@ -1,6 +1,6 @@
 import { Box, Card, Grid, Typography } from "@mui/material";
 import { makeStyles } from "src/hooks/useSxStyles";
-import { generateDashboardData } from "./actions/product";
+import { generateDashboardData } from "../actions/product";
 
 const sxStyles = makeStyles((theme) => ({
   root: {
