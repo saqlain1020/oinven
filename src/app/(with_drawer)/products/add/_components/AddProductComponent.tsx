@@ -14,22 +14,17 @@ import {
 } from "@mui/material";
 import { ProductCategory } from "src/types/product";
 import { DatePicker } from "@mui/x-date-pickers";
-import moment from "moment";
 import React, { useState } from "react";
 import { Delete, Save } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import { useFormState, useFormStatus } from "react-dom";
 import { createOrUpdateProduct } from "src/app/actions/product";
-import Link from "next/link";
 
 import { IMaskInput } from "react-imask";
-import { IProductPopulated } from "../../../../../../../lib/models/Product";
 
-const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: string[] }> = ({
-  product,
-  attributeNames,
-}) => {
-  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>(product.attributes);
+const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attributeNames }) => {
+  const [category, setCategory] = useState(ProductCategory.Phone);
+  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([{ name: "Imei", value: "" }]);
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
 
   const handleAddAttribute = () => {
@@ -50,10 +45,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
     <Box
       component={"form"}
       //  onSubmit={handleSubmit}
-      action={(data) => {
-        data.append("productId", product._id);
-        formAction(data);
-      }}
+      action={formAction}
     >
       <Typography variant="h5" fontWeight={600}>
         Product Details
@@ -61,12 +53,19 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
       <Grid container spacing={3} sx={{ mt: 1 }}>
         {/* Name */}
         <Grid item xs={12} sm={6}>
-          <TextField name="name" defaultValue={product.name} fullWidth label="Name" required />
+          <TextField name="name" fullWidth label="Name" required />
         </Grid>
 
         {/* Category */}
         <Grid item xs={12} sm={6}>
-          <TextField name="category" fullWidth select label="Category" defaultValue={product.category}>
+          <TextField
+            name="category"
+            fullWidth
+            select
+            label="Category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as ProductCategory)}
+          >
             {Object.entries(ProductCategory).map(([key, value]) => (
               <MenuItem key={key} value={value}>
                 {key}
@@ -77,14 +76,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
 
         {/* Description */}
         <Grid item xs={12}>
-          <TextField
-            multiline
-            defaultValue={product.description}
-            name="description"
-            fullWidth
-            rows={3}
-            label="Description"
-          />
+          <TextField multiline name="description" fullWidth rows={3} label="Description" />
         </Grid>
         {/* Attributes */}
         <Grid item xs={12}>
@@ -133,7 +125,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         </Grid>
 
         <Grid item xs={12} sm={6}>
-          <TextField name="buyingPhone" defaultValue={product.boughtFrom?.phone} fullWidth label="Phone" />
+          <TextField name="buyingPhone" fullWidth label="Phone" />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
@@ -142,8 +134,9 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
             </InputLabel>
             <OutlinedInput
               fullWidth
-              defaultValue={product.boughtFrom?.nic}
               name="buyingNic"
+              // value={values.textmask}
+              // onChange={handleChange}
               id="formatted-text-mask-input"
               inputComponent={TextMaskCustom as any}
             />
@@ -151,16 +144,11 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         </Grid>
         {/* Bought At */}
         <Grid item xs={12} sm={6}>
-          <DatePicker
-            defaultValue={product.boughtAt ? moment(product.boughtAt) : undefined}
-            name="boughtAt"
-            label="Buying Date"
-            sx={{ width: "100%" }}
-          />
+          <DatePicker name="boughtAt" label="Buying Date" sx={{ width: "100%" }} />
         </Grid>
         {/* Buy Price */}
         <Grid item xs={12} sm={6}>
-          <TextField name="buyPrice" defaultValue={product.buyPrice} fullWidth label="Buying Price" type="number" />
+          <TextField name="buyPrice" fullWidth label="Buying Price" type="number" />
         </Grid>
         {/* Sell Section */}
         <Grid item xs={12}>
@@ -169,7 +157,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField name="sellingPhone" defaultValue={product.soldTo?.phone} fullWidth label="Phone" />
+          <TextField name="sellingPhone" fullWidth label="Phone" />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
@@ -178,7 +166,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
             </InputLabel>
             <OutlinedInput
               fullWidth
-              defaultValue={product.soldTo?.nic}
+              // value={values.textmask}
+              // onChange={handleChange}
               name="sellingNic"
               id="formatted-text-mask-input"
               inputComponent={TextMaskCustom as any}
@@ -186,33 +175,12 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
           </FormControl>
         </Grid>
         <Grid item xs={12} sm={6}>
-          <DatePicker
-            name="soldAt"
-            defaultValue={product.soldAt ? moment(product.soldAt) : undefined}
-            label="Sell Date"
-            sx={{ width: "100%" }}
-          />
+          <DatePicker name="soldAt" label="Sell Date" sx={{ width: "100%" }} />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField name="sellPrice" defaultValue={product.sellPrice} fullWidth label="Sell Price" type="number" />
+          <TextField name="sellPrice" fullWidth label="Sell Price" type="number" />
         </Grid>
-        <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
-          <Button
-            variant="outlined"
-            color="primary"
-            LinkComponent={Link}
-            href={`/products/receipt/${product._id}/sell`}
-          >
-            Generate Sale Receipt
-          </Button>
-          <Button
-            variant="outlined"
-            color="secondary"
-            LinkComponent={Link}
-            href={`/products/receipt/${product._id}/buy`}
-          >
-            Generate Buy Receipt
-          </Button>
+        <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
           <SubmitButton />
         </Grid>
       </Grid>
@@ -220,13 +188,13 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
   );
 };
 
-export default EditPageComp;
+export default AddProductComponent;
 
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <LoadingButton loading={pending} type="submit" loadingPosition="start" startIcon={<Save />} variant="contained">
-      Save Changes
+      Save Product
     </LoadingButton>
   );
 }

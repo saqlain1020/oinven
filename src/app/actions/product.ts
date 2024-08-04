@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import Product, { IProductPopulated } from "../../../lib/models/Product";
 import { revalidatePath } from "next/cache";
 import Customer from "../../../lib/models/Customer";
+import { AttributesOptions } from "src/types/product";
 
 export async function createOrUpdateProduct(prev: any, formData: FormData) {
   let obj = {
@@ -216,4 +217,26 @@ export async function generateDashboardData() {
     result.currentYearSold = data[0].totalSoldAmount;
   }
   return result;
+}
+
+export async function getAttributesNames() {
+  const data = await Product.aggregate<{ _id: string }>([
+    {
+      $match: {},
+    },
+    {
+      $unwind: {
+        path: "$attributes",
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+    {
+      $group: {
+        _id: "$attributes.name",
+      },
+    },
+  ]);
+  const set = new Set(data.map((item) => item._id));
+  AttributesOptions.forEach((item) => set.add(item));
+  return Array.from(set);
 }
