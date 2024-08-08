@@ -28,9 +28,9 @@ export const makeSxStyles = <T extends {}>(
   };
 };
 
-export const makeStyles = <T extends {}>(stylesCreator: (theme: Theme) => Styles<T>): SxStylesReturn<T> => {
+export const makeStyles = <T extends {}>(stylesCreator: (theme: Theme) => Styles<T>): Styles<T> => {
   const styles = stylesCreator(customTheme);
-  const sxStyles: SxStylesReturn<T> = {} as SxStylesReturn<T>;
+  const sxStyles: Styles<T> = {} as Styles<T>;
   for (const key in styles) {
     if (Object.prototype.hasOwnProperty.call(styles, key)) {
       sxStyles[key] = styles[key];

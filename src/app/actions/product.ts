@@ -9,8 +9,10 @@ import { AttributesOptions } from "src/types/product";
 export async function createOrUpdateProduct(prev: any, formData: FormData) {
   let obj = {
     attributes: [] as { name: string; value: string }[],
+    payments: [] as { date: Date; amount: number }[],
   } as {
     attributes: { name: string; value: string }[];
+    payments: { date: Date; amount: number }[];
     name: string;
     category: string;
     description?: string;
@@ -29,12 +31,13 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     productId?: string;
   };
   formData.forEach((value, key) => {
-    if (key.split(".")[0] === "attributes") {
+    if (key.split(".")[0] === "attributes" || key.split(".")[0] === "payments") {
+      const keyName = key.split(".")[0];
       const index = Number(key.split(".")[1]);
       // @ts-ignore
-      obj.attributes[index] = {
+      obj[keyName][index] = {
         // @ts-ignore
-        ...obj.attributes[index],
+        ...obj[keyName][index],
         [key.split(".")[2]]: value,
       };
     } else {
@@ -86,7 +89,7 @@ export async function getProduct(_id: string) {
 export async function getProducts() {
   const items = await Product.find().sort("-updatedAt").lean();
 
-  return items.map((item) => ({ ...item, _id: item._id.toString() }));
+  return JSON.parse(JSON.stringify(items)) as IProductPopulated[];
 }
 
 export async function generateDashboardData() {

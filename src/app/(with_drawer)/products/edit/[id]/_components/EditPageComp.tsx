@@ -30,22 +30,38 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
   attributeNames,
 }) => {
   const [attributes, setAttributes] = useState<{ name: string; value: string }[]>(product.attributes);
+  const [payments, setPayments] = useState<{ date: moment.Moment; amount: number }[]>(
+    product.payments.map((item) => ({ date: moment(item.date), amount: item.amount }))
+  );
+
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
 
   const handleAddAttribute = () => {
     setAttributes([...attributes, { name: "", value: "" }]);
   };
 
+  const handleAddPayment = () => {
+    setPayments([...payments, { date: moment(), amount: 0 }]);
+  };
   const handleAttributeChange = (index: number, name: string, value: string) => {
     const newAttributes = [...attributes];
     newAttributes[index] = { name, value };
     setAttributes(newAttributes);
   };
 
+  const handlePaymentChange = (index: number, date: moment.Moment, amount: number) => {
+    const newPayments = [...payments];
+    newPayments[index] = { date, amount };
+    setPayments(newPayments);
+  };
+
   const deleteAttribute = (index: number) => {
     setAttributes(attributes.filter((item, i) => i !== index));
   };
 
+  const deletePayment = (index: number) => {
+    setPayments(payments.filter((item, i) => i !== index));
+  };
   return (
     <Box
       component={"form"}
@@ -196,6 +212,45 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         <Grid item xs={12} sm={6}>
           <TextField name="sellPrice" defaultValue={product.sellPrice} fullWidth label="Sell Price" type="number" />
         </Grid>
+        {/* Payments */}
+        <Grid item xs={12}>
+          <Typography fontWeight={600} variant="h6">
+            Payments (Total: {payments.reduce((prev, acc) => prev + acc.amount, 0)})
+          </Typography>
+        </Grid>
+        {payments.map((item, i) => (
+          <Grid key={i} item xs={12}>
+            <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "1fr 1fr max-content", alignItems: "center" }}>
+              <DatePicker
+                name={`payments.${i}.date`}
+                label="Payment Date"
+                sx={{ width: "100%" }}
+                value={item.date}
+                onChange={(v) => handlePaymentChange(i, v || moment(), item.amount)}
+              />
+              <TextField
+                name={`payments.${i}.amount`}
+                fullWidth
+                label="Payment Amount"
+                type="number"
+                value={item.amount}
+                onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value))}
+              />
+              <IconButton onClick={() => deletePayment(i)}>
+                <Delete />
+              </IconButton>
+            </Box>
+          </Grid>
+        ))}
+        <Grid item xs={12}>
+          <Box className="center">
+            <Button variant="outlined" onClick={() => handleAddPayment()}>
+              Add Payment
+            </Button>
+          </Box>
+        </Grid>
+
+        {/* Receipt Buttons */}
         <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end", gap: 2 }}>
           <Button
             variant="outlined"

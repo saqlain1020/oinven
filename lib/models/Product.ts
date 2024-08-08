@@ -7,6 +7,7 @@ export interface IProduct extends Document {
   description?: string;
   category: ProductCategory;
   attributes: { name: string; value: string }[];
+  payments: { date: Date; amount: number }[];
   boughtAt: Date;
   soldAt: Date;
   buyPrice: number;
@@ -66,6 +67,20 @@ const productSchema = new mongoose.Schema<IProduct>(
           },
           value: {
             type: String,
+            required: true,
+          },
+        },
+      ],
+    },
+    payments: {
+      type: [
+        {
+          date: {
+            type: Date,
+            required: true,
+          },
+          amount: {
+            type: Number,
             required: true,
           },
         },

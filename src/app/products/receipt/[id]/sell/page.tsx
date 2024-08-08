@@ -1,4 +1,4 @@
-import { Box, Container, Grid, Typography } from "@mui/material";
+import { Box, Container, Divider, Grid, Typography } from "@mui/material";
 import moment from "moment";
 import { getProduct } from "src/app/actions/product";
 import { makeStyles } from "src/hooks/useSxStyles";
@@ -10,10 +10,22 @@ const sxStyles = makeStyles((theme) => ({
     gridTemplateColumns: "1fr 1fr",
     mb: 1,
   },
+  itemContentRow: {
+    display: "grid",
+    gridTemplateColumns: "5fr 1fr 2fr 2fr",
+    p: 1,
+    px: 4,
+    pt: 2,
+    pb: 0,
+  },
 }));
 
 export default async function Page({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
+  let paidAmount = product.sellPrice;
+  if (product.payments.length > 0) {
+    paidAmount = product.payments.reduce((acc, curr) => acc + curr.amount, 0);
+  }
   return (
     <>
       <Box sx={{ background: "white" }}>
@@ -72,7 +84,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                   Balance Due:
                 </Typography>
                 <Typography textAlign="right" variant="h6" fontWeight={700}>
-                  PKR 0.00
+                  PKR {(product.sellPrice - paidAmount).toLocaleString()}
                 </Typography>
               </Box>
             </Grid>
@@ -94,15 +106,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             <Typography textAlign="right">Rate</Typography>
             <Typography textAlign="right">Amount</Typography>
           </Box>
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "5fr 1fr 2fr 2fr",
-              p: 1,
-              px: 4,
-              pt: 2,
-            }}
-          >
+          <Box sx={sxStyles.itemContentRow}>
             <Box>
               <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
                 {product.name}
@@ -125,6 +129,21 @@ export default async function Page({ params }: { params: { id: string } }) {
               <Typography textAlign={"right"}>Rs {product.sellPrice.toLocaleString()}</Typography>
             </Box>
           </Box>
+          {product.payments.length > 0 && <Divider sx={{ width: "90%", mx: "auto", mt: 2 }} />}
+          {product.payments.map((item, i) => (
+            <Box key={i} sx={sxStyles.itemContentRow}>
+              <Box>
+                <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
+                  Paid on {moment(item.date).format("DD-MMM-YYYY")}
+                </Typography>
+              </Box>
+              <Box></Box>
+              <Box></Box>
+              <Box>
+                <Typography textAlign={"right"}>Rs {item.amount.toLocaleString()}</Typography>
+              </Box>
+            </Box>
+          ))}
           <Grid container spacing={2} sx={{ mt: 6 }}>
             <Grid item xs={6}></Grid>
             <Grid item xs={6}>
@@ -141,7 +160,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                   Amount Paid:
                 </Typography>
                 <Typography textAlign="right" sx={{ pr: 2 }}>
-                  Rs {product.sellPrice.toLocaleString()}
+                  Rs {paidAmount.toLocaleString()}
                 </Typography>
               </Box>
             </Grid>

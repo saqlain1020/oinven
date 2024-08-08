@@ -7,14 +7,30 @@ import moment from "moment";
 import { Delete, Edit, RemoveRedEye } from "@mui/icons-material";
 import { useFormState } from "react-dom";
 import { useRouter } from "next/navigation";
+import ReportProblemIcon from "@mui/icons-material/ReportProblem";
+import { IProductPopulated } from "../../../lib/models/Product";
 
-const columns: GridColDef[] = [
+const columns: GridColDef<IProductPopulated>[] = [
   {
     field: "name",
     sortable: true,
     minWidth: 100,
     headerName: "Name",
     flex: 1,
+    renderCell(params) {
+      let isCreditDue = false;
+      const paidAmount = params.row.payments.reduce((acc, item) => acc + item.amount, 0);
+      const totalSellPrice = params.row.sellPrice;
+      if (totalSellPrice && params.row.payments.length > 0 && paidAmount < totalSellPrice) isCreditDue = true;
+      return (
+        <Tooltip followCursor placement="top" arrow title={isCreditDue ? "Credit Due" : ""}>
+          <Box className="center" sx={{ height: "100%", justifyContent: "flex-start" }}>
+            {isCreditDue && <ReportProblemIcon color="warning" fontSize="small" sx={{ mr: 1 }} />}
+            <Typography sx={{ fontSize: 14 }}>{params.value}</Typography>
+          </Box>
+        </Tooltip>
+      );
+    },
   },
   {
     field: "category",
@@ -115,6 +131,7 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
         // onRowClick={(params) => {
         //   router.push(`products/${params.row._id}`);
         // }}
+        // @ts-ignore
         rows={rows}
         columns={[
           ...columns,
