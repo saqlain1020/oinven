@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import moment from "moment-timezone";
 import Product from "../../../../lib/models/Product";
 
-export default async function () {
+export default async function Page() {
   const timezone = "Asia/Karachi";
 
   // Calculate the start and end of the day

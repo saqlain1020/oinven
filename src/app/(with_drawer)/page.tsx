@@ -19,7 +19,7 @@ export default async function Home() {
         <Grid item xs={12}>
           <Card sx={{ p: 2 }} elevation={5}>
             <Typography textAlign={"center"} variant="body2" color="grey">
-              Today's Profit
+              Today&apos;s Profit
             </Typography>
             <Typography textAlign={"center"} color={profit > 0 ? "green" : "red"} fontWeight={600} variant="h5">
               {profit.toLocaleString()}
@@ -126,4 +126,5 @@ export default async function Home() {
     </Box>
   );
 }
+
 
