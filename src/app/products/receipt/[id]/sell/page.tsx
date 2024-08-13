@@ -3,6 +3,7 @@ import moment from "moment";
 import { getProduct } from "src/app/actions/product";
 import { makeStyles } from "src/hooks/useSxStyles";
 import type { Metadata } from "next";
+import { PaymentType } from "src/types/product";
 
 const sxStyles = makeStyles((theme) => ({
   row: {
@@ -23,7 +24,7 @@ const sxStyles = makeStyles((theme) => ({
 export default async function Page({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
   let paidAmount = product.sellPrice;
-  if (product.payments.length > 0) {
+  if (product.paymentType === PaymentType.Credit) {
     paidAmount = product.payments.reduce((acc, curr) => acc + curr.amount, 0);
   }
   return (
@@ -47,7 +48,10 @@ export default async function Page({ params }: { params: { id: string } }) {
           <Grid container spacing={2} sx={{ mt: 2 }}>
             <Grid item xs={6}>
               <Typography color="GrayText" variant="h6">
-                Bill To:
+                Bill To:{" "}
+                <Typography fontWeight="bold" component="b" color="rgb(58,58,58)">
+                  {product.soldTo?.name}
+                </Typography>
               </Typography>
               <Box sx={{ display: "flex" }}>
                 <Typography color="GrayText">NIC:</Typography>
@@ -76,7 +80,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                   Payment Terms:
                 </Typography>
                 <Typography textAlign="right" sx={{ pr: 2 }}>
-                  Cash
+                  {product.paymentType}
                 </Typography>
               </Box>
               <Box sx={[sxStyles.row, { background: "rgba(0,0,0,0.1)", borderRadius: 2, p: 1, pr: 2 }]}>
@@ -129,7 +133,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               <Typography textAlign={"right"}>Rs {product.sellPrice.toLocaleString()}</Typography>
             </Box>
           </Box>
-          {product.payments.length > 0 && <Divider sx={{ width: "90%", mx: "auto", mt: 2 }} />}
+          {product.paymentType === PaymentType.Credit && <Divider sx={{ width: "90%", mx: "auto", mt: 2 }} />}
           {product.payments.map((item, i) => (
             <Box key={i} sx={sxStyles.itemContentRow}>
               <Box>
@@ -170,12 +174,12 @@ export default async function Page({ params }: { params: { id: string } }) {
           </Typography>
           <Typography color="rgb(58,58,58)">No warranty of camera, touch, and lcd after leaving counter.</Typography>
 
-          {/* <Box sx={{ position: "absolute", bottom: 50, right: 50, width: 300 }}>
-          <Box sx={{ borderBottom: "1px solid black" }} />
-          <Typography variant="h6" fontWeight="bold" textAlign="center">
-          Signature
-          </Typography>
-          </Box>  */}
+          <Box sx={{ position: "relative", ml: "auto", mt: 5, width: "20em" }}>
+            <Box sx={{ borderBottom: "1px solid black" }} />
+            <Typography variant="h6" fontWeight="bold" textAlign="center">
+              Stamp
+            </Typography>
+          </Box>
         </Container>
       </Box>
     </>

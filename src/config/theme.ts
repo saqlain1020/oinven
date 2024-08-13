@@ -20,6 +20,7 @@ const theme = createTheme({
     text: {
       primary: "rgb(230, 230, 230)",
     },
+    divider: "rgb(210,210,210)",
   },
   typography: {
     fontFamily: inter.style.fontFamily,

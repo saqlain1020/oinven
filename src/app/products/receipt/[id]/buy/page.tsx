@@ -2,6 +2,7 @@ import { Box, Container, Divider, Grid, Typography } from "@mui/material";
 import moment from "moment";
 import { getProduct } from "src/app/actions/product";
 import { makeStyles } from "src/hooks/useSxStyles";
+import { PaymentType } from "src/types/product";
 
 const sxStyles = makeStyles((theme) => ({
   row: {
@@ -22,7 +23,9 @@ const sxStyles = makeStyles((theme) => ({
 export default async function Page({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
   let paidAmount = product.buyPrice;
-
+  if (product.buyPaymentType === PaymentType.Credit) {
+    paidAmount = product.buyPayments.reduce((acc, curr) => acc + curr.amount, 0);
+  }
   return (
     <Box sx={{ background: "white" }}>
       <Container sx={{ py: 2, minHeight: "100dvh" }}>
@@ -43,7 +46,10 @@ export default async function Page({ params }: { params: { id: string } }) {
         <Grid container spacing={2} sx={{ mt: 2 }}>
           <Grid item xs={6}>
             <Typography color="GrayText" variant="h6">
-              Bill To:
+              Bill To:{" "}
+              <Typography fontWeight="bold" component="b" color="rgb(58,58,58)">
+                {product.boughtFrom?.name}
+              </Typography>
             </Typography>
             <Box sx={{ display: "flex" }}>
               <Typography color="GrayText">NIC:</Typography>
@@ -72,7 +78,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 Payment Terms:
               </Typography>
               <Typography textAlign="right" sx={{ pr: 2 }}>
-                Cash
+                {product.buyPaymentType}
               </Typography>
             </Box>
             <Box sx={[sxStyles.row, { background: "rgba(0,0,0,0.1)", borderRadius: 2, p: 1, pr: 2 }]}>
@@ -125,7 +131,21 @@ export default async function Page({ params }: { params: { id: string } }) {
             <Typography textAlign={"right"}>Rs {product.buyPrice.toLocaleString()}</Typography>
           </Box>
         </Box>
-
+        {product.buyPaymentType === PaymentType.Credit && <Divider sx={{ width: "90%", mx: "auto", mt: 2 }} />}
+        {product.buyPayments.map((item, i) => (
+          <Box key={i} sx={sxStyles.itemContentRow}>
+            <Box>
+              <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
+                {moment(item.date).format("DD-MMM-YYYY")}
+              </Typography>
+            </Box>
+            <Box></Box>
+            <Box></Box>
+            <Box>
+              <Typography textAlign={"right"}>Rs {item.amount.toLocaleString()}</Typography>
+            </Box>
+          </Box>
+        ))}
         <Grid container spacing={2} sx={{ mt: 6 }}>
           <Grid item xs={6}></Grid>
           <Grid item xs={6}>
@@ -152,76 +172,13 @@ export default async function Page({ params }: { params: { id: string } }) {
         </Typography>
         <Typography color="rgb(58,58,58)">No warranty of camera, touch, and lcd after leaving counter.</Typography>
 
-        {/* <Box sx={{ position: "absolute", bottom: 50, right: 50, width: 300 }}>
-      <Box sx={{ borderBottom: "1px solid black" }} />
-      <Typography variant="h6" fontWeight="bold" textAlign="center">
-      Signature
-      </Typography>
-      </Box>  */}
+        <Box sx={{ position: "relative", ml: "auto", mt: 5, width: "20em" }}>
+          <Box sx={{ borderBottom: "1px solid black" }} />
+          <Typography variant="h6" fontWeight="bold" textAlign="center">
+            Stamp
+          </Typography>
+        </Box>
       </Container>
     </Box>
-    // <Box sx={{ background: "white" }}>
-    //   <Container sx={{ py: 2, minHeight: "100dvh" }}>
-    //     <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    //       <Typography textAlign="center" color="rgba(0,0,0,0.8)" variant="h5" fontWeight={"bold"}>
-    //         Osama Enterprises
-    //       </Typography>
-    //       <Typography textAlign="center" color="rgba(0,0,0,0.8)" variant="h6" fontWeight={"bold"}>
-    //         INVOICE
-    //       </Typography>
-    //     </Box>
-    //     <Divider sx={{ mt: 2 }} />
-    //     <Typography sx={{ mt: 3 }}>
-    //       <b>Buying Date:</b> {moment(product.boughtAt).format("DD-MMM-YYYY")}
-    //     </Typography>
-    //     <Typography sx={{ mt: 1 }}>
-    //       <b>Phone:</b> {product.boughtFrom?.phone}
-    //     </Typography>
-    //     <Typography sx={{ mt: 1 }}>
-    //       <b>NIC:</b> {product.boughtFrom?.nic}
-    //     </Typography>
-    //     <Box
-    //       sx={{
-    //         display: "grid",
-    //         gridTemplateColumns: "3fr 1fr",
-    //         mt: 3,
-    //         borderTop: "2px solid black",
-    //         borderBottom: "2px solid black",
-    //         p: 1,
-    //       }}
-    //     >
-    //       <Typography textAlign={"center"} fontWeight="bold">
-    //         DESCRIPTION
-    //       </Typography>
-    //       <Typography textAlign={"center"} fontWeight="bold" sx={{ borderLeft: "2px solid black" }}>
-    //         AMOUNT
-    //       </Typography>
-    //     </Box>
-    //     <Box sx={{ p: 2, pb: 0, borderLeft: "2px solid grey", borderRight: "2px solid grey", mt: 1 }}>
-    //       <Typography className="boldTagLight">
-    //         <b>Product Name:</b> {product.name}
-    //       </Typography>
-    //       {product.attributes.map((item, i) => (
-    //         <Typography sx={{ mt: 1 }} key={i} className="boldTagLight">
-    //           <b>{item.name}:</b> {item.value}
-    //         </Typography>
-    //       ))}
-    //       <Divider sx={{ mt: 2 }} />
-    //       <Box sx={{ display: "flex", mt: 2, justifyContent: "flex-end" }}>
-    //         <Typography variant="h4">
-    //           <b>Total:</b> {product.buyPrice.toLocaleString()} RS
-    //         </Typography>
-    //       </Box>
-    //     </Box>
-    //     <Box sx={{ borderBottom: "2px solid grey", mt: 1 }} />
-
-    //     <Box sx={{ position: "absolute", bottom: 50, right: 50, width: 300 }}>
-    //       <Box sx={{ borderBottom: "1px solid black" }} />
-    //       <Typography variant="h6" fontWeight="bold" textAlign="center">
-    //         Signature
-    //       </Typography>
-    //     </Box>
-    //   </Container>
-    // </Box>
   );
 }
