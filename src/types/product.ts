@@ -3,4 +3,19 @@ export enum ProductCategory {
   Other = "Other",
 }
 
-export let AttributesOptions = ["Imei", "Color", "Storage", "Ram", "Battery Health", "Condition", "Manufacturer"];
+export enum PaymentType {
+  Cash = "Cash",
+  Account = "Account",
+  Credit = "Credit",
+}
+
+export let AttributesOptions = [
+  "Imei",
+  "Color",
+  "Storage",
+  "Battery Health",
+  "Manufacturer",
+  "CPLC",
+  "Ram",
+  "Condition",
+];

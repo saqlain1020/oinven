@@ -1,10 +1,12 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import Product, { IProductPopulated } from "../../../lib/models/Product";
+import Product, { IProduct, IProductPopulated } from "../../../lib/models/Product";
 import { revalidatePath } from "next/cache";
 import Customer from "../../../lib/models/Customer";
 import { AttributesOptions } from "src/types/product";
+import moment from "moment-timezone";
+const timezone = "Asia/Karachi";
 
 export async function createOrUpdateProduct(prev: any, formData: FormData) {
   let obj = {
@@ -18,6 +20,8 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     description?: string;
     buyingPhone?: string;
     buyingNic?: string;
+    buyingName?: string;
+    sellingName?: string;
     boughtAt?: string;
     buyPrice?: string;
     sellingPhone?: string;
@@ -49,6 +53,7 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     let boughtFrom = await Customer.findOne({ nic: obj.buyingNic });
     if (!boughtFrom) {
       boughtFrom = await Customer.create({
+        name: obj.buyingName,
         nic: obj.buyingNic,
         phone: obj.buyingPhone,
       });
@@ -59,6 +64,7 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     let soldTo = await Customer.findOne({ nic: obj.sellingNic });
     if (!soldTo) {
       soldTo = await Customer.create({
+        name: obj.sellingName,
         nic: obj.sellingNic,
         phone: obj.sellingPhone,
       });
@@ -97,10 +103,6 @@ export async function generateDashboardData() {
   let result = {
     totalBoughtAmount: 0,
     totalSoldAmount: 0,
-    currentMonthBought: 0,
-    currentMonthSold: 0,
-    currentYearBought: 0,
-    currentYearSold: 0,
   };
 
   data = await Product.aggregate<{
@@ -117,7 +119,22 @@ export async function generateDashboardData() {
           $sum: "$buyPrice",
         },
         totalSoldAmount: {
-          $sum: "$sellPrice",
+          $sum: {
+            $cond: {
+              if: {
+                $or: [
+                  {
+                    $eq: [{ $size: "$payments" }, 0],
+                  },
+                  {
+                    $eq: ["$sellPrice", { $sum: "$payments.amount" }],
+                  },
+                ],
+              },
+              then: "$sellPrice",
+              else: 0,
+            },
+          },
         },
       },
     },
@@ -126,99 +143,23 @@ export async function generateDashboardData() {
     result.totalBoughtAmount = data[0].totalBoughtAmount;
     result.totalSoldAmount = data[0].totalSoldAmount;
   }
-  data = await Product.aggregate<{
-    totalBoughtAmount: number;
-  }>([
-    {
-      $match: {
-        boughtAt: {
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
-        },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalBoughtAmount: {
-          $sum: "$buyPrice",
-        },
-      },
-    },
-  ]);
-  if (data.length > 0) {
-    result.currentMonthBought = data[0].totalBoughtAmount;
-  }
-  data = await Product.aggregate<{
-    totalSoldAmount: number;
-  }>([
-    {
-      $match: {
-        soldAt: {
-          $gte: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-          $lt: new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
-        },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalSoldAmount: {
-          $sum: "$sellPrice",
-        },
-      },
-    },
-  ]);
-  if (data.length > 0) {
-    result.currentMonthSold = data[0].totalSoldAmount;
-  }
 
-  data = await Product.aggregate<{
-    totalBoughtAmount: number;
-  }>([
-    {
-      $match: {
-        boughtAt: {
-          $gte: new Date(new Date().getFullYear(), 0, 1),
-          $lt: new Date(new Date().getFullYear() + 1, 0, 1),
-        },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalBoughtAmount: {
-          $sum: "$buyPrice",
-        },
-      },
-    },
-  ]);
-  if (data.length > 0) {
-    result.currentYearBought = data[0].totalBoughtAmount;
-  }
-  data = await Product.aggregate<{
-    totalSoldAmount: number;
-  }>([
-    {
-      $match: {
-        soldAt: {
-          $gte: new Date(new Date().getFullYear(), 0, 1),
-          $lt: new Date(new Date().getFullYear() + 1, 0, 1),
-        },
-      },
-    },
-    {
-      $group: {
-        _id: null,
-        totalSoldAmount: {
-          $sum: "$sellPrice",
-        },
-      },
-    },
-  ]);
-  if (data.length > 0) {
-    result.currentYearSold = data[0].totalSoldAmount;
-  }
+  // const timezone = "Asia/Karachi";
+
+  // // Calculate the start and end of the day
+  // const todayStart = moment.tz(timezone).startOf("day").toDate();
+  // const todayEnd = moment.tz(timezone).endOf("day").toDate();
+  // Product.aggregate([{
+  //   $match:{
+  //     boughtAt:
+  //       {
+  //         $gte: todayStart,
+  //         $lte: todayEnd
+  //       }
+  //     }
+  //   }
+  // }])
+
   return result;
 }
 
@@ -242,4 +183,160 @@ export async function getAttributesNames() {
   const set = new Set(data.map((item) => item._id));
   AttributesOptions.forEach((item) => set.add(item));
   return Array.from(set);
+}
+
+export async function getTodaysData() {
+  const todayStart = moment.tz(timezone).startOf("day").toDate();
+  const todayEnd = moment.tz(timezone).endOf("day").toDate();
+
+  const data = await Product.aggregate<IProduct>([
+    {
+      $match: {
+        $or: [
+          {
+            boughtAt: {
+              $gte: todayStart,
+              $lte: todayEnd,
+            },
+          },
+          {
+            paymentType: "Cash",
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: todayStart,
+              $lte: todayEnd,
+            },
+          },
+          {
+            paymentType: "Account",
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: todayStart,
+              $lte: todayEnd,
+            },
+          },
+          // {
+          //   $expr: {
+          //     $eq: ["$paymentsSum", "$sellPrice"],
+          //   },
+          // },
+          {
+            paymentType: "Credit",
+            payments: {
+              $elemMatch: {
+                date: {
+                  $gte: todayStart,
+                  $lte: todayEnd,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  // const isInToday = someMoment.isBetween(todayStart, todayEnd, null, '[]');
+  const todayBoughtItems = data.filter((item) => {
+    if (moment(item.boughtAt).isBetween(todayStart, todayEnd, null, "[]")) return true;
+    return false;
+  });
+  const todaySoldItems = data.filter((item) => {
+    if (moment(item.soldAt).isBetween(todayStart, todayEnd, null, "[]") && item.paymentType !== "Credit") return true;
+    return false;
+  });
+  const totalCreditClearedItems = data.filter((item) => {
+    const totalPayments = item.payments.reduce((acc, curr) => {
+      return acc + curr.amount;
+    }, 0);
+    if (totalPayments === item.sellPrice) return true;
+    return false;
+  });
+  const todayBought = todayBoughtItems.reduce((acc, item) => acc + item.buyPrice, 0);
+  const todaySold =
+    todaySoldItems.reduce((acc, item) => acc + item.sellPrice, 0) +
+    totalCreditClearedItems.reduce((acc, item) => acc + item.sellPrice, 0);
+  const profit = todaySold - todayBought;
+  return {
+    todayBoughtItems,
+    todaySoldItems,
+    totalCreditClearedItems,
+    todayBought,
+    todaySold,
+    profit,
+  };
+}
+export async function getCurrentMonthsData() {
+  const monthStart = moment.tz(timezone).startOf("month").toDate();
+  const monthEnd = moment.tz(timezone).endOf("month").toDate();
+
+  const data = await Product.aggregate<IProduct>([
+    {
+      $match: {
+        $or: [
+          {
+            boughtAt: {
+              $gte: monthStart,
+              $lte: monthEnd,
+            },
+          },
+          {
+            paymentType: "Cash",
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: monthStart,
+              $lte: monthEnd,
+            },
+          },
+          {
+            paymentType: "Account",
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: monthStart,
+              $lte: monthEnd,
+            },
+          },
+          {
+            paymentType: "Credit",
+            payments: {
+              $elemMatch: {
+                date: {
+                  $gte: monthStart,
+                  $lte: monthEnd,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  // const isInToday = someMoment.isBetween(todayStart, todayEnd, null, '[]');
+  const monthBoughtItems = data.filter((item) => {
+    if (moment(item.boughtAt).isBetween(monthStart, monthEnd, null, "[]")) return true;
+    return false;
+  });
+  const monthSoldItems = data.filter((item) => {
+    if (moment(item.soldAt).isBetween(monthStart, monthEnd, null, "[]") && item.paymentType !== "Credit") return true;
+    return false;
+  });
+  const totalCreditClearedItems = data.filter((item) => {
+    const totalPayments = item.payments.reduce((acc, curr) => {
+      return acc + curr.amount;
+    }, 0);
+    if (totalPayments === item.sellPrice) return true;
+    return false;
+  });
+  const monthBought = monthBoughtItems.reduce((acc, item) => acc + item.buyPrice, 0);
+  const monthSold =
+    monthSoldItems.reduce((acc, item) => acc + item.sellPrice, 0) +
+    totalCreditClearedItems.reduce((acc, item) => acc + item.sellPrice, 0);
+  const profit = monthSold - monthBought;
+  return {
+    monthBoughtItems,
+    monthSoldItems,
+    totalCreditClearedItems,
+    monthBought,
+    monthSold,
+    monthProfit: profit,
+  };
 }

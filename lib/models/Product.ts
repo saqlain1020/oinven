@@ -1,13 +1,17 @@
 import mongoose, { Model, Document } from "mongoose";
-import { ProductCategory } from "src/types/product";
+import { PaymentType, ProductCategory } from "src/types/product";
 import Customer, { ICustomer } from "./Customer";
 
 export interface IProduct extends Document {
   name: string;
   description?: string;
   category: ProductCategory;
+  paymentType: PaymentType;
+  buyPaymentType: PaymentType;
+  paymentAccount?: string;
   attributes: { name: string; value: string }[];
   payments: { date: Date; amount: number }[];
+  buyPayments: { date: Date; amount: number }[];
   boughtAt: Date;
   soldAt: Date;
   buyPrice: number;
@@ -30,6 +34,24 @@ const productSchema = new mongoose.Schema<IProduct>(
       type: String,
       required: [true, "Please provide a name"],
       index: true,
+    },
+    buyPaymentType: {
+      type: String,
+      required: true,
+      enum: Object.values(PaymentType),
+      default: PaymentType.Cash,
+    },
+    paymentType: {
+      type: String,
+      required: true,
+      enum: Object.values(PaymentType),
+      default: PaymentType.Cash,
+    },
+    paymentAccount: {
+      type: String,
+      required: function () {
+        return this.paymentType === PaymentType.Account;
+      },
     },
     description: {
       type: String,
@@ -71,6 +93,7 @@ const productSchema = new mongoose.Schema<IProduct>(
           },
         },
       ],
+      default: [],
     },
     payments: {
       type: [
@@ -85,6 +108,22 @@ const productSchema = new mongoose.Schema<IProduct>(
           },
         },
       ],
+      default: [],
+    },
+    buyPayments: {
+      type: [
+        {
+          date: {
+            type: Date,
+            required: true,
+          },
+          amount: {
+            type: Number,
+            required: true,
+          },
+        },
+      ],
+      default: [],
     },
   },
   {

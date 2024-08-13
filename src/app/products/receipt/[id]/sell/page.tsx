@@ -134,7 +134,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             <Box key={i} sx={sxStyles.itemContentRow}>
               <Box>
                 <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
-                  Paid on {moment(item.date).format("DD-MMM-YYYY")}
+                  {moment(item.date).format("DD-MMM-YYYY")}
                 </Typography>
               </Box>
               <Box></Box>

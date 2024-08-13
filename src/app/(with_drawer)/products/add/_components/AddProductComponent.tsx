@@ -12,7 +12,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { ProductCategory } from "src/types/product";
+import { AttributesOptions, PaymentType, ProductCategory } from "src/types/product";
 import { DatePicker } from "@mui/x-date-pickers";
 import React, { useState } from "react";
 import { Delete, Save } from "@mui/icons-material";
@@ -24,15 +24,28 @@ import moment from "moment";
 
 const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attributeNames }) => {
   const [category, setCategory] = useState(ProductCategory.Phone);
-  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([{ name: "Imei", value: "" }]);
+  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([
+    { name: AttributesOptions[0], value: "" },
+    { name: AttributesOptions[1], value: "" },
+    { name: AttributesOptions[2], value: "" },
+    { name: AttributesOptions[3], value: "" },
+    { name: AttributesOptions[4], value: "" },
+    { name: AttributesOptions[5], value: "" },
+  ]);
   const [payments, setPayments] = useState<{ date: moment.Moment; amount: number }[]>([]);
+  const [buyPayments, setBuyPayments] = useState<{ date: moment.Moment; amount: number }[]>([]);
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
+  const [paymentType, setPaymentType] = useState<PaymentType>(PaymentType.Cash);
+  const [buyPaymentType, setBuyPaymentType] = useState<PaymentType>(PaymentType.Cash);
 
   const handleAddAttribute = () => {
     setAttributes([...attributes, { name: "", value: "" }]);
   };
   const handleAddPayment = () => {
     setPayments([...payments, { date: moment(), amount: 0 }]);
+  };
+  const handleAddBuyPayment = () => {
+    setBuyPayments([...buyPayments, { date: moment(), amount: 0 }]);
   };
 
   const handleAttributeChange = (index: number, name: string, value: string) => {
@@ -46,6 +59,11 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
     newPayments[index] = { date, amount };
     setPayments(newPayments);
   };
+  const handleBuyPaymentChange = (index: number, date: moment.Moment, amount: number) => {
+    const newPayments = [...buyPayments];
+    newPayments[index] = { date, amount };
+    setBuyPayments(newPayments);
+  };
 
   const deleteAttribute = (index: number) => {
     setAttributes(attributes.filter((item, i) => i !== index));
@@ -53,6 +71,9 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
 
   const deletePayment = (index: number) => {
     setPayments(payments.filter((item, i) => i !== index));
+  };
+  const deleteBuyPayment = (index: number) => {
+    setBuyPayments(buyPayments.filter((item, i) => i !== index));
   };
 
   return (
@@ -107,13 +128,14 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
                   options={attributeNames}
                   value={item.name}
                   fullWidth
-                  renderInput={(params) => <TextField {...params} name={`attributes.${i}.name`} />}
+                  renderInput={(params) => <TextField required {...params} name={`attributes.${i}.name`} />}
                   onChange={(_, v) => handleAttributeChange(i, v || "", item.value)}
                 />
                 <TextField
                   name={`attributes.${i}.value`}
                   value={item.value}
                   fullWidth
+                  required
                   onChange={(e) => handleAttributeChange(i, item.name, e.target.value)}
                 />
 
@@ -131,19 +153,24 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
             </Box>
           </Grid>
         </Grid>
+        {
+          // #region Buy
+        }
         {/* Buy Section */}
         <Grid item xs={12}>
           <Typography fontWeight={600} variant="h6">
             Buy Section
           </Typography>
         </Grid>
-
+        <Grid item xs={12} sm={6}>
+          <TextField name="buyingName" fullWidth label="Name" />
+        </Grid>
         <Grid item xs={12} sm={6}>
           <TextField name="buyingPhone" fullWidth label="Phone" />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel htmlFor="formatted-text-mask-input" sx={{ background: "white" }}>
+            <InputLabel htmlFor="formatted-text-mask-input" sx={{ background: "black" }}>
               NIC
             </InputLabel>
             <OutlinedInput
@@ -164,6 +191,66 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
         <Grid item xs={12} sm={6}>
           <TextField name="buyPrice" fullWidth label="Buying Price" type="number" />
         </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            value={buyPaymentType}
+            onChange={(e) => setBuyPaymentType(e.target.value as PaymentType)}
+            select
+            name="buyPaymentType"
+            fullWidth
+            label="Payment Type"
+          >
+            <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
+            <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
+            <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
+          </TextField>
+        </Grid>
+        {buyPaymentType === PaymentType.Credit && (
+          <>
+            {/* Payments */}
+            <Grid item xs={12}>
+              <Typography fontWeight={600} variant="h6">
+                Payments (Total: {buyPayments.reduce((prev, acc) => prev + acc.amount, 0)})
+              </Typography>
+            </Grid>
+            {buyPayments.map((item, i) => (
+              <Grid key={i} item xs={12}>
+                <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "1fr 1fr max-content", alignItems: "center" }}>
+                  <DatePicker
+                    name={`buyPayments.${i}.date`}
+                    label="Payment Date"
+                    sx={{ width: "100%" }}
+                    onChange={(v) => handleBuyPaymentChange(i, v || moment(), item.amount)}
+                  />
+                  <TextField
+                    name={`buyPayments.${i}.amount`}
+                    fullWidth
+                    label="Payment Amount"
+                    required
+                    type="number"
+                    onChange={(e) => handleBuyPaymentChange(i, item.date, Number(e.target.value))}
+                  />
+                  <IconButton onClick={() => deleteBuyPayment(i)}>
+                    <Delete />
+                  </IconButton>
+                </Box>
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              <Box className="center">
+                <Button variant="outlined" onClick={() => handleAddBuyPayment()}>
+                  Add Payment
+                </Button>
+              </Box>
+            </Grid>
+          </>
+        )}
+        {
+          // #endregion Buy
+        }
+        {
+          // #region Sell
+        }
         {/* Sell Section */}
         <Grid item xs={12}>
           <Typography fontWeight={600} variant="h6">
@@ -171,11 +258,14 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6}>
+          <TextField name="sellingName" fullWidth label="Name" />
+        </Grid>
+        <Grid item xs={12} sm={6}>
           <TextField name="sellingPhone" fullWidth label="Phone" />
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel htmlFor="formatted-text-mask-input" sx={{ background: "white" }}>
+            <InputLabel htmlFor="formatted-text-mask-input" sx={{ background: "black" }}>
               NIC
             </InputLabel>
             <OutlinedInput
@@ -194,43 +284,68 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
         <Grid item xs={12} sm={6}>
           <TextField name="sellPrice" fullWidth label="Sell Price" type="number" />
         </Grid>
-
-        {/* Payments */}
-        <Grid item xs={12}>
-          <Typography fontWeight={600} variant="h6">
-            Payments (Total: {payments.reduce((prev, acc) => prev + acc.amount, 0)})
-          </Typography>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            value={paymentType}
+            onChange={(e) => setPaymentType(e.target.value as PaymentType)}
+            select
+            name="paymentType"
+            fullWidth
+            label="Payment Type"
+          >
+            <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
+            <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
+            <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
+          </TextField>
         </Grid>
-        {payments.map((item, i) => (
-          <Grid key={i} item xs={12}>
-            <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "1fr 1fr max-content", alignItems: "center" }}>
-              <DatePicker
-                name={`payments.${i}.date`}
-                label="Payment Date"
-                sx={{ width: "100%" }}
-                onChange={(v) => handlePaymentChange(i, v || moment(), item.amount)}
-              />
-              <TextField
-                name={`payments.${i}.amount`}
-                fullWidth
-                label="Payment Amount"
-                type="number"
-                onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value))}
-              />
-              <IconButton onClick={() => deletePayment(i)}>
-                <Delete />
-              </IconButton>
-            </Box>
+        {paymentType === PaymentType.Credit && (
+          <>
+            {/* Payments */}
+            <Grid item xs={12}>
+              <Typography fontWeight={600} variant="h6">
+                Payments (Total: {payments.reduce((prev, acc) => prev + acc.amount, 0)})
+              </Typography>
+            </Grid>
+            {payments.map((item, i) => (
+              <Grid key={i} item xs={12}>
+                <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "1fr 1fr max-content", alignItems: "center" }}>
+                  <DatePicker
+                    name={`payments.${i}.date`}
+                    label="Payment Date"
+                    sx={{ width: "100%" }}
+                    onChange={(v) => handlePaymentChange(i, v || moment(), item.amount)}
+                  />
+                  <TextField
+                    name={`payments.${i}.amount`}
+                    fullWidth
+                    label="Payment Amount"
+                    type="number"
+                    required
+                    onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value))}
+                  />
+                  <IconButton onClick={() => deletePayment(i)}>
+                    <Delete />
+                  </IconButton>
+                </Box>
+              </Grid>
+            ))}
+            <Grid item xs={12}>
+              <Box className="center">
+                <Button variant="outlined" onClick={() => handleAddPayment()}>
+                  Add Payment
+                </Button>
+              </Box>
+            </Grid>
+          </>
+        )}
+        {paymentType === PaymentType.Account && (
+          <Grid item xs={12} sm={6}>
+            <TextField name="paymentAccount" required fullWidth label="Account No." />
           </Grid>
-        ))}
-        <Grid item xs={12}>
-          <Box className="center">
-            <Button variant="outlined" onClick={() => handleAddPayment()}>
-              Add Payment
-            </Button>
-          </Box>
-        </Grid>
-
+        )}
+        {
+          // #endregion Sell
+        }
         <Grid item xs={12} sx={{ display: "flex", justifyContent: "flex-end" }}>
           <SubmitButton />
         </Grid>

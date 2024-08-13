@@ -11,6 +11,7 @@ const customerSchema = new mongoose.Schema<ICustomer>(
   {
     name: {
       type: String,
+      required: true,
     },
     nic: {
       type: String,
