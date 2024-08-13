@@ -220,11 +220,13 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
                     name={`buyPayments.${i}.date`}
                     label="Payment Date"
                     sx={{ width: "100%" }}
+                    value={item.date}
                     onChange={(v) => handleBuyPaymentChange(i, v || moment(), item.amount)}
                   />
                   <TextField
                     name={`buyPayments.${i}.amount`}
                     fullWidth
+                    value={item.amount}
                     label="Payment Amount"
                     required
                     type="number"
@@ -312,12 +314,14 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
                   <DatePicker
                     name={`payments.${i}.date`}
                     label="Payment Date"
+                    value={item.date}
                     sx={{ width: "100%" }}
                     onChange={(v) => handlePaymentChange(i, v || moment(), item.amount)}
                   />
                   <TextField
                     name={`payments.${i}.amount`}
                     fullWidth
+                    value={item.amount}
                     label="Payment Amount"
                     type="number"
                     required

@@ -1,5 +1,6 @@
 export enum ProductCategory {
   Phone = "Phone",
+  Accessory = "Accessory",
   Other = "Other",
 }
 

@@ -228,12 +228,14 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
                     name={`buyPayments.${i}.date`}
                     label="Payment Date"
                     sx={{ width: "100%" }}
+                    value={item.date}
                     onChange={(v) => handleBuyPaymentChange(i, v || moment(), item.amount)}
                   />
                   <TextField
                     name={`buyPayments.${i}.amount`}
                     fullWidth
                     label="Payment Amount"
+                    value={item.amount}
                     required
                     type="number"
                     onChange={(e) => handleBuyPaymentChange(i, item.date, Number(e.target.value))}
