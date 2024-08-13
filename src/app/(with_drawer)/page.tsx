@@ -10,7 +10,7 @@ const sxStyles = makeStyles((theme) => ({
 
 export default async function Home() {
   const data = await generateDashboardData();
-  const { profit, todayBought, todaySold } = await getTodaysData();
+  const { profit, todayBought, todaySold, todayCreditPaid, todayCreditReceived } = await getTodaysData();
   const { monthBought, monthSold, monthProfit } = await getCurrentMonthsData();
   return (
     <Box component={"main"}>
@@ -46,6 +46,26 @@ export default async function Home() {
             </Typography>
           </Card>
         </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Today Credit Paid
+            </Typography>
+            <Typography fontWeight={600} variant="h6" color="red">
+              {todayCreditPaid.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Today Credit Received
+            </Typography>
+            <Typography fontWeight={600} variant="h6" color="green">
+              {todayCreditReceived.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
 
         <Grid item xs={12}>
           <Typography fontWeight={"bold"} sx={{ mt: 2 }} variant="h5">
@@ -78,7 +98,7 @@ export default async function Home() {
             <Typography variant="body2" color="grey">
               Month Profit
             </Typography>
-            <Typography color={monthProfit > 0 ? "green" : "red"} fontWeight={600} variant="h6">
+            <Typography textAlign="center" color={monthProfit > 0 ? "green" : "red"} fontWeight={600} variant="h6">
               {monthProfit.toLocaleString()}
             </Typography>
           </Card>
