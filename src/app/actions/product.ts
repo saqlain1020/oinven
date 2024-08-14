@@ -6,6 +6,7 @@ import { revalidatePath } from "next/cache";
 import Customer from "../../../lib/models/Customer";
 import { AttributesOptions, PaymentType } from "src/types/product";
 import moment from "moment-timezone";
+import { sleep } from "src/utils/common";
 const timezone = "Asia/Karachi";
 
 export async function createOrUpdateProduct(prev: any, formData: FormData) {
@@ -96,71 +97,6 @@ export async function getProducts() {
   const items = await Product.find().sort("-updatedAt").lean();
 
   return JSON.parse(JSON.stringify(items)) as IProductPopulated[];
-}
-
-export async function generateDashboardData() {
-  let data: any;
-  let result = {
-    totalBoughtAmount: 0,
-    totalSoldAmount: 0,
-  };
-
-  data = await Product.aggregate<{
-    totalBoughtAmount: number;
-    totalSoldAmount: number;
-  }>([
-    {
-      $match: {},
-    },
-    {
-      $group: {
-        _id: null,
-        totalBoughtAmount: {
-          $sum: "$buyPrice",
-        },
-        totalSoldAmount: {
-          $sum: {
-            $cond: {
-              if: {
-                $or: [
-                  {
-                    $eq: [{ $size: "$payments" }, 0],
-                  },
-                  {
-                    $eq: ["$sellPrice", { $sum: "$payments.amount" }],
-                  },
-                ],
-              },
-              then: "$sellPrice",
-              else: 0,
-            },
-          },
-        },
-      },
-    },
-  ]);
-  if (data.length > 0) {
-    result.totalBoughtAmount = data[0].totalBoughtAmount;
-    result.totalSoldAmount = data[0].totalSoldAmount;
-  }
-
-  // const timezone = "Asia/Karachi";
-
-  // // Calculate the start and end of the day
-  // const todayStart = moment.tz(timezone).startOf("day").toDate();
-  // const todayEnd = moment.tz(timezone).endOf("day").toDate();
-  // Product.aggregate([{
-  //   $match:{
-  //     boughtAt:
-  //       {
-  //         $gte: todayStart,
-  //         $lte: todayEnd
-  //       }
-  //     }
-  //   }
-  // }])
-
-  return result;
 }
 
 export async function getAttributesNames() {
@@ -410,30 +346,6 @@ export async function getCurrentMonthsData() {
     }
     return false;
   });
-  // const totalBoughtCreditClearedItems = data.filter((item) => {
-  //   if (item.buyPaymentType === PaymentType.Credit) {
-  //     const hasCreditThisTime = item.buyPayments.some((ele) =>
-  //       moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")
-  //     );
-  //     const totalPayments = item.buyPayments.reduce((acc, curr) => {
-  //       return acc + curr.amount;
-  //     }, 0);
-  //     if (totalPayments === item.buyPrice && hasCreditThisTime) return true;
-  //   }
-  //   return false;
-  // });
-  // const totalSoldCreditClearedItems = data.filter((item) => {
-  //   if (item.paymentType === PaymentType.Credit) {
-  //     const hasCreditThisTime = item.payments.some((ele) =>
-  //       moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")
-  //     );
-  //     const totalPayments = item.payments.reduce((acc, curr) => {
-  //       return acc + curr.amount;
-  //     }, 0);
-  //     if (totalPayments === item.sellPrice && hasCreditThisTime) return true;
-  //   }
-  //   return false;
-  // });
   const monthBought = monthBoughtItems.reduce((acc, item) => {
     return acc + item.buyPrice;
   }, 0);
@@ -446,4 +358,82 @@ export async function getCurrentMonthsData() {
     monthSold,
     monthProfit: monthSold - monthBought,
   };
+}
+
+export async function getCreditsToReceive() {
+  const data = await Product.aggregate<IProductPopulated>([
+    {
+      $match: {
+        paymentType: PaymentType.Credit,
+      },
+    },
+    {
+      $addFields: {
+        paymentsAmount: {
+          $sum: "$payments.amount",
+        },
+      },
+    },
+    {
+      $match: {
+        $expr: {
+          $ne: ["$sellPrice", "$paymentsAmount"],
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "customers",
+        localField: "soldTo",
+        foreignField: "_id",
+        as: "soldTo",
+      },
+    },
+    {
+      $unwind: {
+        path: "$soldTo",
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+  ]);
+  return JSON.parse(JSON.stringify(data));
+}
+
+export async function getCreditsToPay() {
+  const data = await Product.aggregate<IProductPopulated>([
+    {
+      $match: {
+        buyPaymentType: PaymentType.Credit,
+      },
+    },
+    {
+      $addFields: {
+        buyPaymentsAmount: {
+          $sum: "$buyPayments.amount",
+        },
+      },
+    },
+    {
+      $match: {
+        $expr: {
+          $ne: ["$buyPrice", "$buyPaymentsAmount"],
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "customers",
+        localField: "boughtFrom",
+        foreignField: "_id",
+        as: "boughtFrom",
+      },
+    },
+    {
+      $unwind: {
+        path: "$boughtFrom",
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+  ]);
+  return JSON.parse(JSON.stringify(data));
 }

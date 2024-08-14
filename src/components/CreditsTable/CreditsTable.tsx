@@ -1,0 +1,204 @@
+"use client";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
+import React, { useMemo } from "react";
+import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
+import { deleteProduct, getProducts } from "src/app/actions/product";
+import moment from "moment";
+import { Delete, Edit, RemoveRedEye } from "@mui/icons-material";
+import { useFormState } from "react-dom";
+import { useRouter } from "next/navigation";
+import { IProductPopulated } from "../../../lib/models/Product";
+
+const columnsPayments: GridColDef<IProductPopulated>[] = [
+  {
+    field: "soldToName",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Name",
+    valueGetter: (_, row) => row.soldTo?.name,
+    flex: 1,
+  },
+  {
+    field: "name",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Product",
+    flex: 1,
+  },
+  {
+    field: "soldAt",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Sold At",
+    valueFormatter: (v: string) => (v ? moment(v).fromNow() : "-"),
+    flex: 1,
+    renderCell(params) {
+      return (
+        <Box className="center" sx={{ height: "100%" }}>
+          <Tooltip placement="top" title={moment(params.value).format("DD-MMM-YYYY")}>
+            <Typography sx={{ fontSize: 14 }}>{params.formattedValue}</Typography>
+          </Tooltip>
+        </Box>
+      );
+    },
+  },
+  {
+    field: "sellPrice",
+    sortable: true,
+    cellClassName: "red",
+    minWidth: 100,
+    headerName: "Sell Price",
+    valueFormatter: (v?: number) => (v ? Number(v).toLocaleString() : "-"),
+    valueGetter: (v?: number) => (v ? Number(v) : 0),
+    flex: 1,
+  },
+  {
+    field: "balanceDue",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Balance Due",
+    flex: 1,
+    valueGetter: (_, row) => {
+      const paidAmount = row.payments.reduce((acc, item) => acc + item.amount, 0);
+      return row.sellPrice - paidAmount;
+    },
+    valueFormatter: (v?: number) => (v ? Number(v).toLocaleString() : "-"),
+  },
+];
+const columnsBuyPayments: GridColDef<IProductPopulated>[] = [
+  {
+    field: "boughtFromName",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Name",
+    valueGetter: (_, row) => row.boughtFrom?.name,
+    flex: 1,
+  },
+  {
+    field: "name",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Product",
+    flex: 1,
+  },
+  {
+    field: "boughtAt",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Bought At",
+    valueFormatter: (v: string) => (v ? moment(v).fromNow() : "-"),
+    flex: 1,
+    renderCell(params) {
+      return (
+        <Box className="center" sx={{ height: "100%" }}>
+          <Tooltip placement="top" title={moment(params.value).format("DD-MMM-YYYY")}>
+            <Typography sx={{ fontSize: 14 }}>{params.formattedValue}</Typography>
+          </Tooltip>
+        </Box>
+      );
+    },
+  },
+  {
+    field: "buyPrice",
+    sortable: true,
+    cellClassName: "red",
+    minWidth: 100,
+    headerName: "Buy Price",
+    valueFormatter: (v?: number) => (v ? Number(v).toLocaleString() : "-"),
+    valueGetter: (v?: number) => (v ? Number(v) : 0),
+    flex: 1,
+  },
+  {
+    field: "balanceDue",
+    sortable: true,
+    minWidth: 100,
+    headerName: "Balance Due",
+    flex: 1,
+    valueGetter: (_, row) => {
+      const paidAmount = row.buyPayments.reduce((acc, item) => acc + item.amount, 0);
+      return row.buyPrice - paidAmount;
+    },
+    valueFormatter: (v?: number) => (v ? Number(v).toLocaleString() : "-"),
+  },
+];
+
+const CreditsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>>; type: "buy" | "sell" }> = ({
+  data,
+  type,
+}) => {
+  const [_, formAction] = useFormState(deleteProduct, null);
+  const router = useRouter();
+
+  const rows = useMemo(() => {
+    return data.map((item) => {
+      const imei = item.attributes.find((item) => item.name.toLowerCase().includes("imei"))?.value;
+      const info = imei ? imei : undefined;
+      return {
+        ...item,
+        imei: info,
+      };
+    });
+  }, [data]);
+
+  return (
+    <Box sx={{ minHeight: 300, mt: 2 }}>
+      <DataGrid
+        sx={{ minHeight: 300 }}
+        disableColumnFilter
+        // disableColumnSelector
+        disableDensitySelector
+        // checkboxSelection
+        // loading
+        getRowId={(row) => row._id}
+        // onRowClick={(params) => {
+        //   router.push(`products/${params.row._id}`);
+        // }}
+        // @ts-ignore
+        rows={rows}
+        columns={[
+          ...(type === "sell" ? columnsPayments : columnsBuyPayments),
+          {
+            headerName: "Actions",
+            field: "",
+            width: 150,
+            align: "center",
+            renderCell(params) {
+              const isSold = !!params.row.soldAt;
+              return (
+                <Box>
+                  {!isSold && (
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ minWidth: 0, minHeight: 0 }}
+                      onClick={() => router.push(`products/edit/${params.row._id}`)}
+                    >
+                      Sell
+                    </Button>
+                  )}
+                  <IconButton size="small" onClick={() => router.push(`products/receipt/${params.row._id}/${type}`)}>
+                    <RemoveRedEye fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => router.push(`products/edit/${params.row._id}`)}>
+                    <Edit fontSize="small" />
+                  </IconButton>
+                  <IconButton size="small" onClick={() => formAction(params.row._id)}>
+                    <Delete fontSize="small" />
+                  </IconButton>
+                </Box>
+              );
+            },
+          },
+        ]}
+        slots={{ toolbar: GridToolbar }}
+        slotProps={{
+          toolbar: {
+            showQuickFilter: true,
+          },
+        }}
+      />
+    </Box>
+  );
+};
+
+export default CreditsTable;

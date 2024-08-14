@@ -131,7 +131,9 @@ export default async function Page({ params }: { params: { id: string } }) {
             <Typography textAlign={"right"}>Rs {product.buyPrice.toLocaleString()}</Typography>
           </Box>
         </Box>
-        {product.buyPaymentType === PaymentType.Credit && <Divider sx={{ width: "90%", mx: "auto", mt: 2 }} />}
+        {product.buyPaymentType === PaymentType.Credit && (
+          <Divider variant="light" sx={{ width: "90%", mx: "auto", mt: 2 }} />
+        )}
         {product.buyPayments.map((item, i) => (
           <Box key={i} sx={sxStyles.itemContentRow}>
             <Box>

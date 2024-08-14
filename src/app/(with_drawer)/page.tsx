@@ -1,6 +1,7 @@
 import { Box, Card, Divider, Grid, Typography } from "@mui/material";
 import { makeStyles } from "src/hooks/useSxStyles";
-import { generateDashboardData, getCurrentMonthsData, getTodaysData } from "../actions/product";
+import { getCreditsToPay, getCreditsToReceive, getCurrentMonthsData, getTodaysData } from "../actions/product";
+import CreditsTable from "src/components/CreditsTable/CreditsTable";
 
 const sxStyles = makeStyles((theme) => ({
   root: {
@@ -9,9 +10,10 @@ const sxStyles = makeStyles((theme) => ({
 }));
 
 export default async function Home() {
-  const data = await generateDashboardData();
   const { profit, todayBought, todaySold, todayCreditPaid, todayCreditReceived } = await getTodaysData();
   const { monthBought, monthSold, monthProfit } = await getCurrentMonthsData();
+  const creditsRecevingItems = await getCreditsToReceive();
+  const creditsPayItems = await getCreditsToPay();
   return (
     <Box component={"main"}>
       <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -95,7 +97,7 @@ export default async function Home() {
         </Grid>
         <Grid item xs={12}>
           <Card sx={{ p: 2 }}>
-            <Typography variant="body2" color="grey">
+            <Typography variant="body2" color="grey" textAlign="center">
               Month Profit
             </Typography>
             <Typography textAlign="center" color={monthProfit > 0 ? "green" : "red"} fontWeight={600} variant="h6">
@@ -107,44 +109,28 @@ export default async function Home() {
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
         </Grid>
-
-        <Grid item xs={12} md={6}>
-          <Card sx={{ p: 2 }}>
-            <Typography variant="body2" color="grey">
-              Total Bought
-            </Typography>
-            <Typography fontWeight={600} variant="h6">
-              {data.totalBoughtAmount.toLocaleString()}
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ p: 2 }}>
-            <Typography variant="body2" color="grey">
-              Total Sold
-            </Typography>
-            <Typography fontWeight={600} variant="h6">
-              {data.totalSoldAmount.toLocaleString()}
-            </Typography>
-          </Card>
+        <Grid item xs={12}>
+          <Typography fontWeight={"bold"} sx={{ mt: 2 }} variant="h5">
+            Credits To Receive:-
+          </Typography>
         </Grid>
         <Grid item xs={12}>
-          <Card sx={{ p: 2 }}>
-            <Typography variant="body2" color="grey">
-              Total Profit
-            </Typography>
-            <Typography
-              color={data.totalSoldAmount - data.totalBoughtAmount > 0 ? "green" : "red"}
-              fontWeight={600}
-              variant="h6"
-            >
-              {(data.totalSoldAmount - data.totalBoughtAmount).toLocaleString()}
-            </Typography>
-          </Card>
+          <CreditsTable type="sell" data={creditsRecevingItems} />
+        </Grid>
+        <Grid item xs={12}>
+          <Typography fontWeight={"bold"} sx={{ mt: 2 }} variant="h5">
+            Credits To Pay:-
+          </Typography>
+        </Grid>
+        <Grid item xs={12}>
+          <CreditsTable type="buy" data={creditsPayItems} />
         </Grid>
       </Grid>
     </Box>
   );
 }
+
+
+
 
 

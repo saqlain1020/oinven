@@ -2375,6 +2375,13 @@ next-auth@^5.0.0-beta.20:
   dependencies:
     "@auth/core" "0.34.2"
 
+next-nprogress-bar@^2.3.13:
+  version "2.3.13"
+  resolved "https://registry.yarnpkg.com/next-nprogress-bar/-/next-nprogress-bar-2.3.13.tgz#1e19b880e02dc6156f3bab6d762824ec8d2365ee"
+  integrity sha512-eJQDvPSUwZ2yRyNKqAH6xTFI4RtIFvs+qtY8essTtfooyaxLGmkanEO7vL83U166bullMtVpixD6FQk5SQkhMw==
+  dependencies:
+    nprogress "^0.2.0"
+
 next@14.2.5:
   version "14.2.5"
   resolved "https://registry.yarnpkg.com/next/-/next-14.2.5.tgz#afe4022bb0b752962e2205836587a289270efbea"
@@ -2397,6 +2404,11 @@ next@14.2.5:
     "@next/swc-win32-arm64-msvc" "14.2.5"
     "@next/swc-win32-ia32-msvc" "14.2.5"
     "@next/swc-win32-x64-msvc" "14.2.5"
+
+nprogress@^0.2.0:
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/nprogress/-/nprogress-0.2.0.tgz#cb8f34c53213d895723fcbab907e9422adbcafb1"
+  integrity sha512-I19aIingLgR1fmhftnbWWO3dXc0hSxqHQHQb3H8m+K3TnEn/iSeTZZOyvKXWqQESMwuUVnatlCnZdLBZZt2VSA==
 
 oauth4webapi@^2.10.4:
   version "2.11.1"

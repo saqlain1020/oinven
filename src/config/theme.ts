@@ -3,6 +3,12 @@ import { Roboto } from "next/font/google";
 import { createTheme } from "@mui/material/styles";
 import { Inter } from "next/font/google";
 
+declare module "@mui/material/Divider" {
+  interface DividerPropsVariantOverrides {
+    light: true;
+  }
+}
+
 const roboto = Roboto({
   weight: ["300", "400", "500", "700"],
   subsets: ["latin"],
@@ -20,7 +26,9 @@ const theme = createTheme({
     text: {
       primary: "rgb(230, 230, 230)",
     },
-    divider: "rgb(210,210,210)",
+    background: {
+      default: "rgb(40,40,40)",
+    },
   },
   typography: {
     fontFamily: inter.style.fontFamily,
@@ -45,6 +53,18 @@ const theme = createTheme({
           color: "black",
         },
       },
+    },
+    MuiDivider: {
+      variants: [
+        {
+          props: {
+            variant: "light",
+          },
+          style: {
+            borderColor: "rgb(210,210,210)",
+          },
+        },
+      ],
     },
   },
 });
