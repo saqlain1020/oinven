@@ -21,17 +21,23 @@ import { useFormState, useFormStatus } from "react-dom";
 import { createOrUpdateProduct } from "src/app/actions/product";
 import { IMaskInput } from "react-imask";
 import moment from "moment";
+import { IProductPopulated } from "../../../../../../lib/models/Product";
 
-const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attributeNames }) => {
-  const [category, setCategory] = useState(ProductCategory.Phone);
-  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>([
-    { name: AttributesOptions[0], value: "" },
-    { name: AttributesOptions[1], value: "" },
-    { name: AttributesOptions[2], value: "" },
-    { name: AttributesOptions[3], value: "" },
-    { name: AttributesOptions[4], value: "" },
-    { name: AttributesOptions[5], value: "" },
-  ]);
+const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IProductPopulated | null }> = ({
+  attributeNames,
+  oldProduct,
+}) => {
+  const [category, setCategory] = useState(oldProduct?.category || ProductCategory.Phone);
+  const [attributes, setAttributes] = useState<{ name: string; value: string }[]>(
+    oldProduct?.attributes || [
+      { name: AttributesOptions[0], value: "" },
+      { name: AttributesOptions[1], value: "" },
+      { name: AttributesOptions[2], value: "" },
+      { name: AttributesOptions[3], value: "" },
+      { name: AttributesOptions[4], value: "" },
+      { name: AttributesOptions[5], value: "" },
+    ]
+  );
   const [payments, setPayments] = useState<{ date: moment.Moment; amount: number }[]>([]);
   const [buyPayments, setBuyPayments] = useState<{ date: moment.Moment; amount: number }[]>([]);
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
@@ -88,7 +94,7 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
       <Grid container spacing={3} sx={{ mt: 1 }}>
         {/* Name */}
         <Grid item xs={12} sm={6}>
-          <TextField name="name" fullWidth label="Name" required />
+          <TextField name="name" fullWidth label="Name" required defaultValue={oldProduct?.name} />
         </Grid>
 
         {/* Category */}
@@ -111,7 +117,14 @@ const AddProductComponent: React.FC<{ attributeNames: string[] }> = ({ attribute
 
         {/* Description */}
         <Grid item xs={12}>
-          <TextField multiline name="description" fullWidth rows={3} label="Description" />
+          <TextField
+            multiline
+            name="description"
+            fullWidth
+            rows={3}
+            label="Description"
+            defaultValue={oldProduct?.description}
+          />
         </Grid>
         {/* Attributes */}
         <Grid item xs={12}>

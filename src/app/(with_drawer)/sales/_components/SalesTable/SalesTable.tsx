@@ -1,11 +1,12 @@
 "use client";
 import React, { useMemo } from "react";
 import { IProductPopulated } from "../../../../../../lib/models/Product";
-import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
 import { Delete, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import moment from "moment";
+import Link from "next/link";
 
 const columns: GridColDef<IProductPopulated>[] = [
   {
@@ -122,6 +123,9 @@ const SalesTable: React.FC<{ data: IProductPopulated[] }> = ({ data }) => {
             renderCell(params) {
               return (
                 <Box>
+                  <Button LinkComponent={Link} href={`/products/add?rebuyid=${params.row._id}`}>
+                    Rebuy
+                  </Button>
                   <IconButton size="small" onClick={() => router.push(`products/edit/${params.row._id}`)}>
                     <Edit fontSize="small" />
                   </IconButton>
