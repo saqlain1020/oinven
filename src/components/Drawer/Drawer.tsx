@@ -26,6 +26,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import PaymentsIcon from "@mui/icons-material/Payments";
 
 const drawerWidth = 240;
 
@@ -95,6 +96,11 @@ const routes = [
     icon: <AddIcon />,
   },
   {
+    name: "Expenses",
+    path: "/expenses",
+    icon: <PaymentsIcon />,
+  },
+  {
     name: "Manage Users",
     path: "/manage_users",
     icon: <ManageAccountsIcon />,
@@ -158,7 +164,7 @@ export default function PersistentDrawerLeft({ children }) {
         <List>
           {routes.map((item, index) => (
             <ListItem key={item.name} disablePadding>
-              <ListItemButton LinkComponent={Link} href={item.path}>
+              <ListItemButton LinkComponent={Link} href={item.path} onClick={() => handleDrawerClose()}>
                 <ListItemIcon>{item.icon}</ListItemIcon>
                 <ListItemText primary={item.name} />
               </ListItemButton>
@@ -167,7 +173,7 @@ export default function PersistentDrawerLeft({ children }) {
         </List>
         <Divider />
       </Drawer>
-      <Main open={open}>
+      <Main open={open} sx={{ width: "100%" }}>
         <DrawerHeader />
         {children}
       </Main>
