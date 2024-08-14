@@ -14,9 +14,14 @@ const AddExpenseModal = () => {
   const [amount, setAmount] = useState("");
   const handleAdd = async () => {
     setLoading(true);
-    await addExpense(reason, date.toString(), Number(amount));
-    setLoading(false);
-    setOpen(false);
+    try {
+      await addExpense(reason, date.toString(), Number(amount));
+      setOpen(false);
+    } catch (error) {
+      alert("Failed to add expense!");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
