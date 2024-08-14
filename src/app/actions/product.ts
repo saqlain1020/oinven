@@ -7,6 +7,7 @@ import Customer from "../../../lib/models/Customer";
 import { AttributesOptions, PaymentType } from "src/types/product";
 import moment from "moment-timezone";
 import { sleep } from "src/utils/common";
+import Expense from "../../../lib/models/Expense";
 const timezone = "Asia/Karachi";
 
 export async function createOrUpdateProduct(prev: any, formData: FormData) {
@@ -187,6 +188,8 @@ export async function getTodaysData() {
       },
     },
   ]);
+
+  const expenses = await Expense.find({ date: { $gte: todayStart, $lte: todayEnd } }).lean();
   /** Items that are bought on full payment today */
   const todayBoughtItems = data.filter((item) => {
     if (item.buyPaymentType !== PaymentType.Credit && moment(item.boughtAt).isBetween(todayStart, todayEnd, null, "[]"))
@@ -234,11 +237,13 @@ export async function getTodaysData() {
     });
     return acc + amountToBeAdded;
   }, 0);
+  const todayExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
 
-  const profit = todaySold - todayBought - todayCreditPaid + todayCreditReceived;
+  const profit = todaySold - todayBought - todayCreditPaid + todayCreditReceived - todayExpense;
   return {
     todayBoughtItems,
     todaySoldItems,
+    todayExpense,
     todayBoughtCreditItems,
     todaySoldCreditItems,
     todayBought,
@@ -314,6 +319,12 @@ export async function getCurrentMonthsData() {
       },
     },
   ]);
+  const expenses = await Expense.find({
+    date: {
+      $gte: monthStart,
+      $lte: monthEnd,
+    },
+  }).lean();
   // const isInToday = someMoment.isBetween(todayStart, todayEnd, null, '[]');
   const monthBoughtItems = data.filter((item) => {
     if (item.buyPaymentType !== PaymentType.Credit && moment(item.boughtAt).isBetween(monthStart, monthEnd, null, "[]"))
@@ -352,11 +363,12 @@ export async function getCurrentMonthsData() {
   const monthSold = monthSoldItems.reduce((acc, item) => {
     return acc + item.sellPrice;
   }, 0);
-
+  const monthExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
   return {
     monthBought,
     monthSold,
-    monthProfit: monthSold - monthBought,
+    monthExpense,
+    monthProfit: monthSold - monthBought - monthExpense,
   };
 }
 

@@ -10,7 +10,9 @@ export default async function Products() {
       <Typography variant="h4" fontWeight={"bold"}>
         Products
       </Typography>
-      <ProductsTable data={items} />
+      <Box>
+        <ProductsTable data={items} />
+      </Box>
       <Typography variant="h5" sx={{ mt: 2 }} fontWeight={"bold"}>
         Credits to receive
       </Typography>

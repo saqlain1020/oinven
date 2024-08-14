@@ -10,21 +10,31 @@ const sxStyles = makeStyles((theme) => ({
 }));
 
 export default async function Home() {
-  const { profit, todayBought, todaySold, todayCreditPaid, todayCreditReceived } = await getTodaysData();
-  const { monthBought, monthSold, monthProfit } = await getCurrentMonthsData();
+  const { profit, todayBought, todaySold, todayCreditPaid, todayCreditReceived, todayExpense } = await getTodaysData();
+  const { monthBought, monthSold, monthProfit, monthExpense } = await getCurrentMonthsData();
   const creditsRecevingItems = await getCreditsToReceive();
   const creditsPayItems = await getCreditsToPay();
   return (
     <Box component={"main"}>
       <Grid container spacing={2} sx={{ mt: 1 }}>
         {/* Todays */}
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <Card sx={{ p: 2 }} elevation={5}>
             <Typography textAlign={"center"} variant="body2" color="grey">
               Today&apos;s Profit
             </Typography>
             <Typography textAlign={"center"} color={profit > 0 ? "green" : "red"} fontWeight={600} variant="h5">
               {profit.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Today Expense
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {todayExpense.toLocaleString()}
             </Typography>
           </Card>
         </Grid>
@@ -95,7 +105,7 @@ export default async function Home() {
             </Typography>
           </Card>
         </Grid>
-        <Grid item xs={12}>
+        <Grid item xs={12} sm={6}>
           <Card sx={{ p: 2 }}>
             <Typography variant="body2" color="grey" textAlign="center">
               Month Profit
@@ -105,7 +115,16 @@ export default async function Home() {
             </Typography>
           </Card>
         </Grid>
-
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Month Expense
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {monthExpense.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
         <Grid item xs={12}>
           <Divider sx={{ my: 2 }} />
         </Grid>
@@ -129,8 +148,5 @@ export default async function Home() {
     </Box>
   );
 }
-
-
-
 
 
