@@ -2,7 +2,7 @@
 import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import React, { useMemo } from "react";
 import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
-import { deleteProduct, getProducts } from "src/app/actions/product";
+import { deleteProduct } from "src/app/actions/product";
 import moment from "moment";
 import { Delete, Edit, RemoveRedEye } from "@mui/icons-material";
 import { useFormState } from "react-dom";
@@ -122,10 +122,7 @@ const columnsBuyPayments: GridColDef<IProductPopulated>[] = [
   },
 ];
 
-const CreditsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>>; type: "buy" | "sell" }> = ({
-  data,
-  type,
-}) => {
+const CreditsTable: React.FC<{ data: IProductPopulated[]; type: "buy" | "sell" }> = ({ data, type }) => {
   const [_, formAction] = useFormState(deleteProduct, null);
   const router = useRouter();
 
