@@ -17,8 +17,6 @@ import ListItem from "@mui/material/ListItem";
 import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 import HomeIcon from "@mui/icons-material/Home";
 import CategoryIcon from "@mui/icons-material/Category";
 import AddIcon from "@mui/icons-material/Add";
@@ -27,6 +25,7 @@ import { usePathname } from "next/navigation";
 import LogoutIcon from "@mui/icons-material/Logout";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import PaymentsIcon from "@mui/icons-material/Payments";
+import SellIcon from "@mui/icons-material/Sell";
 
 const drawerWidth = 240;
 
@@ -86,7 +85,7 @@ const routes = [
     icon: <HomeIcon />,
   },
   {
-    name: "Products",
+    name: "Inventory",
     path: "/products",
     icon: <CategoryIcon />,
   },
@@ -99,6 +98,11 @@ const routes = [
     name: "Expenses",
     path: "/expenses",
     icon: <PaymentsIcon />,
+  },
+  {
+    name: "Sales",
+    path: "/sales",
+    icon: <SellIcon />,
   },
   {
     name: "Manage Users",

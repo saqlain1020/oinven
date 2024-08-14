@@ -94,8 +94,63 @@ export async function getProduct(_id: string) {
   return prod?.toJSON() as IProductPopulated;
 }
 
-export async function getProducts() {
-  const items = await Product.find().sort("-updatedAt").lean();
+export async function getSales() {
+  const res = await Product.aggregate<IProductPopulated>([
+    {
+      $addFields: {
+        paymentsAmount: {
+          $sum: "$payments.amount",
+        },
+      },
+    },
+    {
+      $match: {
+        $or: [
+          {
+            paymentType: PaymentType.Credit,
+            $expr: {
+              $eq: ["$sellPrice", "$paymentsAmount"],
+            },
+          },
+          {
+            paymentType: PaymentType.Cash,
+            $expr: {
+              $ne: ["$sellPrice", null],
+            },
+          },
+          {
+            paymentType: PaymentType.Account,
+            $expr: {
+              $ne: ["$sellPrice", null],
+            },
+          },
+        ],
+      },
+    },
+    {
+      $lookup: {
+        from: "customers",
+        localField: "soldTo",
+        foreignField: "_id",
+        as: "soldTo",
+      },
+    },
+    {
+      $unwind: {
+        path: "$soldTo",
+        preserveNullAndEmptyArrays: false,
+      },
+    },
+  ]);
+
+  return res;
+}
+
+/** Get products in shop, which are not sold */
+export async function getInventory() {
+  const items = await Product.find({ sellPrice: { $eq: null } })
+    .sort("-updatedAt")
+    .lean();
 
   return JSON.parse(JSON.stringify(items)) as IProductPopulated[];
 }

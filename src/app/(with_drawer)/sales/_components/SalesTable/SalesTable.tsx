@@ -1,14 +1,11 @@
 "use client";
-import { Box, Button, IconButton, Tooltip, Typography } from "@mui/material";
 import React, { useMemo } from "react";
-import { DataGrid, GridToolbar, GridColDef } from "@mui/x-data-grid";
-import { deleteProduct, getProducts } from "src/app/actions/product";
-import moment from "moment";
-import { Delete, Edit, RemoveRedEye } from "@mui/icons-material";
-import { useFormState } from "react-dom";
+import { IProductPopulated } from "../../../../../../lib/models/Product";
+import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { DataGrid, GridColDef, GridToolbar } from "@mui/x-data-grid";
+import { Delete, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
-import ReportProblemIcon from "@mui/icons-material/ReportProblem";
-import { IProductPopulated } from "../../../lib/models/Product";
+import moment from "moment";
 
 const columns: GridColDef<IProductPopulated>[] = [
   {
@@ -17,20 +14,6 @@ const columns: GridColDef<IProductPopulated>[] = [
     minWidth: 100,
     headerName: "Name",
     flex: 1,
-    renderCell(params) {
-      let isCreditDue = false;
-      const paidAmount = params.row.payments.reduce((acc, item) => acc + item.amount, 0);
-      const totalSellPrice = params.row.sellPrice;
-      if (totalSellPrice && params.row.payments.length > 0 && paidAmount < totalSellPrice) isCreditDue = true;
-      return (
-        <Tooltip followCursor placement="top" arrow title={isCreditDue ? "Credit Due" : ""}>
-          <Box className="center" sx={{ height: "100%", justifyContent: "flex-start" }}>
-            {isCreditDue && <ReportProblemIcon color="warning" fontSize="small" sx={{ mr: 1 }} />}
-            <Typography sx={{ fontSize: 14 }}>{params.value}</Typography>
-          </Box>
-        </Tooltip>
-      );
-    },
   },
   {
     field: "category",
@@ -48,7 +31,7 @@ const columns: GridColDef<IProductPopulated>[] = [
     flex: 1,
     renderCell(params) {
       return (
-        <Box className="center" sx={{ height: "100%" }}>
+        <Box className="center" sx={{ height: "100%", justifyContent: "flex-start" }}>
           <Tooltip placement="top" title={moment(params.value).format("DD-MMM-YYYY")}>
             <Typography sx={{ fontSize: 14 }}>{params.formattedValue}</Typography>
           </Tooltip>
@@ -75,7 +58,7 @@ const columns: GridColDef<IProductPopulated>[] = [
     flex: 1,
     renderCell(params) {
       return (
-        <Box className="center" sx={{ height: "100%" }}>
+        <Box className="center" sx={{ height: "100%", justifyContent: "flex-start" }}>
           <Tooltip placement="top" title={moment(params.value).format("DD-MMM-YYYY")}>
             <Typography sx={{ fontSize: 14 }}>{params.formattedValue}</Typography>
           </Tooltip>
@@ -102,11 +85,8 @@ const columns: GridColDef<IProductPopulated>[] = [
     flex: 1,
   },
 ];
-
-const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }> = ({ data }) => {
-  const [_, formAction] = useFormState(deleteProduct, null);
+const SalesTable: React.FC<{ data: IProductPopulated[] }> = ({ data }) => {
   const router = useRouter();
-
   const rows = useMemo(() => {
     return data.map((item) => {
       const imei = item.attributes.find((item) => item.name.toLowerCase().includes("imei"))?.value;
@@ -117,9 +97,8 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
       };
     });
   }, [data]);
-
   return (
-    <Box sx={{ minHeight: 300, mt: 2 }}>
+    <Box>
       <DataGrid
         sx={{ minHeight: 300 }}
         disableColumnFilter
@@ -141,26 +120,12 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
             width: 150,
             align: "center",
             renderCell(params) {
-              const isSold = !!params.row.soldAt;
               return (
                 <Box>
-                  {!isSold && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      sx={{ minWidth: 0, minHeight: 0 }}
-                      onClick={() => router.push(`products/edit/${params.row._id}`)}
-                    >
-                      Sell
-                    </Button>
-                  )}
-                  <IconButton size="small" onClick={() => router.push(`products/${params.row._id}`)}>
-                    <RemoveRedEye fontSize="small" />
-                  </IconButton>
                   <IconButton size="small" onClick={() => router.push(`products/edit/${params.row._id}`)}>
                     <Edit fontSize="small" />
                   </IconButton>
-                  <IconButton size="small" onClick={() => formAction(params.row._id)}>
+                  <IconButton size="small">
                     <Delete fontSize="small" />
                   </IconButton>
                 </Box>
@@ -179,4 +144,4 @@ const ProductsTable: React.FC<{ data: Awaited<ReturnType<typeof getProducts>> }>
   );
 };
 
-export default ProductsTable;
+export default SalesTable;
