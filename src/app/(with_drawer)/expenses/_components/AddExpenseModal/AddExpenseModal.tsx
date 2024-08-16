@@ -62,6 +62,8 @@ const AddExpenseModal = () => {
           <TextField
             label="Amount"
             type="number"
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
             fullWidth
             sx={{ mt: 2 }}
             value={amount}

@@ -256,6 +256,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
                     value={item.amount}
                     required
                     type="number"
+                    // @ts-ignore
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => handleBuyPaymentChange(i, item.date, Number(e.target.value))}
                   />
                   <IconButton onClick={() => deleteBuyPayment(i)}>
@@ -324,12 +326,12 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
                 setSoldAt(null);
               }
             }}
-            // @ts-ignore
-            onWheel={(e) => e.target.blur()}
             defaultValue={product.sellPrice}
             fullWidth
             label="Sell Price"
             type="number"
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
@@ -369,6 +371,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
                     fullWidth
                     label="Payment Amount"
                     type="number"
+                    // @ts-ignore
+                    onWheel={(e) => e.target.blur()}
                     value={item.amount}
                     onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value))}
                   />

@@ -265,6 +265,8 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
                     label="Payment Amount"
                     required
                     type="number"
+                    // @ts-ignore
+                    onWheel={(e) => e.target.blur()}
                     onChange={(e) => handleBuyPaymentChange(i, item.date, Number(e.target.value))}
                   />
                   <IconButton onClick={() => deleteBuyPayment(i)}>
@@ -379,6 +381,8 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
                     value={item.amount}
                     label="Payment Amount"
                     type="number"
+                    // @ts-ignore
+                    onWheel={(e) => e.target.blur()}
                     required
                     onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value))}
                   />
