@@ -1,6 +1,12 @@
 import { Box, Card, Divider, Grid, Typography } from "@mui/material";
 import { makeStyles } from "src/hooks/useSxStyles";
-import { getCreditsToPay, getCreditsToReceive, getCurrentMonthsData, getTodaysData } from "../actions/product";
+import {
+  getCreditsToPay,
+  getCreditsToReceive,
+  getCurrentMonthsData,
+  getCurrentWeekData,
+  getTodaysData,
+} from "../actions/product";
 import CreditsTable from "src/components/CreditsTable/CreditsTable";
 
 const sxStyles = makeStyles((theme) => ({
@@ -12,6 +18,7 @@ const sxStyles = makeStyles((theme) => ({
 export default async function Home() {
   const { profit, todayBought, todaySold, todayCreditPaid, todayCreditReceived, todayExpense } = await getTodaysData();
   const { monthBought, monthSold, monthProfit, monthExpense } = await getCurrentMonthsData();
+  const { weekBought, weekExpense, weekProfit, weekSold } = await getCurrentWeekData();
   const creditsRecevingItems = await getCreditsToReceive();
   const creditsPayItems = await getCreditsToPay();
   return (
@@ -79,6 +86,52 @@ export default async function Home() {
           </Card>
         </Grid>
 
+        <Grid item xs={12}>
+          <Typography fontWeight={"bold"} sx={{ mt: 2 }} variant="h5">
+            Week Data:-
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Week Bought
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {weekBought.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Week Sold
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {weekSold.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey" textAlign="center">
+              Week Profit
+            </Typography>
+            <Typography textAlign="center" color={weekProfit > 0 ? "green" : "red"} fontWeight={600} variant="h6">
+              {weekProfit.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2 }}>
+            <Typography variant="body2" color="grey">
+              Week Expense
+            </Typography>
+            <Typography fontWeight={600} variant="h6">
+              {weekExpense.toLocaleString()}
+            </Typography>
+          </Card>
+        </Grid>
         <Grid item xs={12}>
           <Typography fontWeight={"bold"} sx={{ mt: 2 }} variant="h5">
             Month Data:-

@@ -426,6 +426,122 @@ export async function getCurrentMonthsData() {
     monthProfit: monthSold - monthBought - monthExpense,
   };
 }
+export async function getCurrentWeekData() {
+  const weekStart = moment.tz(timezone).startOf("week").toDate();
+  const weekEnd = moment.tz(timezone).endOf("week").toDate();
+
+  const data = await Product.aggregate<IProduct>([
+    {
+      $match: {
+        $or: [
+          {
+            paymentType: "Cash",
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: weekStart,
+              $lte: weekEnd,
+            },
+          },
+          {
+            paymentType: "Account",
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: weekStart,
+              $lte: weekEnd,
+            },
+          },
+          {
+            paymentType: "Credit",
+            payments: {
+              $elemMatch: {
+                date: {
+                  $gte: weekStart,
+                  $lte: weekEnd,
+                },
+              },
+            },
+          },
+          {
+            buyPaymentType: "Cash",
+            buyPrice: { $exists: true },
+            boughtAt: {
+              $gte: weekStart,
+              $lte: weekEnd,
+            },
+          },
+          {
+            buyPaymentType: "Account",
+            buyPrice: { $exists: true },
+            boughtAt: {
+              $gte: weekStart,
+              $lte: weekEnd,
+            },
+          },
+          {
+            buyPaymentType: "Credit",
+            buyPayments: {
+              $elemMatch: {
+                date: {
+                  $gte: weekStart,
+                  $lte: weekEnd,
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
+  ]);
+  const expenses = await Expense.find({
+    date: {
+      $gte: weekStart,
+      $lte: weekEnd,
+    },
+  }).lean();
+  // const isInToday = someMoment.isBetween(todayStart, todayEnd, null, '[]');
+  const weekBoughtItems = data.filter((item) => {
+    if (item.buyPaymentType !== PaymentType.Credit && moment(item.boughtAt).isBetween(weekStart, weekEnd, null, "[]"))
+      return true;
+
+    // Check for credit clearance
+    if (item.buyPaymentType === PaymentType.Credit) {
+      const hasCreditThisTime = item.buyPayments.some((ele) =>
+        moment(ele.date).isBetween(weekStart, weekEnd, null, "[]")
+      );
+      const totalPayments = item.buyPayments.reduce((acc, curr) => {
+        return acc + curr.amount;
+      }, 0);
+      if (totalPayments === item.buyPrice && hasCreditThisTime) return true;
+    }
+    return false;
+  });
+  const weekSoldItems = data.filter((item) => {
+    if (item.paymentType !== PaymentType.Credit && moment(item.soldAt).isBetween(weekStart, weekEnd, null, "[]"))
+      return true;
+    // Check for credit clearance
+    if (item.paymentType === PaymentType.Credit) {
+      const hasCreditThisTime = item.payments.some((ele) => moment(ele.date).isBetween(weekStart, weekEnd, null, "[]"));
+      const totalPayments = item.payments.reduce((acc, curr) => {
+        return acc + curr.amount;
+      }, 0);
+      if (totalPayments === item.sellPrice && hasCreditThisTime) return true;
+    }
+    return false;
+  });
+  const weekBought = weekBoughtItems.reduce((acc, item) => {
+    return acc + item.buyPrice;
+  }, 0);
+  const weekSold = weekSoldItems.reduce((acc, item) => {
+    return acc + item.sellPrice;
+  }, 0);
+  const weekExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
+  return {
+    weekBought,
+    weekSold,
+    weekExpense,
+    weekProfit: weekSold - weekBought - weekExpense,
+  };
+}
 
 export async function getCreditsToReceive() {
   const data = await Product.aggregate<IProductPopulated>([
