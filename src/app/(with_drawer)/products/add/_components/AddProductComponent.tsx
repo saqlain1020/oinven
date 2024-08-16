@@ -221,6 +221,8 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
             }}
             fullWidth
             label="Buying Price"
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
             type="number"
           />
         </Grid>
@@ -332,6 +334,8 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
                 setSoldAt(null);
               }
             }}
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
             fullWidth
             label="Sell Price"
             type="number"

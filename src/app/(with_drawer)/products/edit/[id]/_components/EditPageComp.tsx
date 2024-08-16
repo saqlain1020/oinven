@@ -211,6 +211,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
               }
             }}
             fullWidth
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
             label="Buying Price"
             type="number"
           />
@@ -322,6 +324,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
                 setSoldAt(null);
               }
             }}
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
             defaultValue={product.sellPrice}
             fullWidth
             label="Sell Price"
