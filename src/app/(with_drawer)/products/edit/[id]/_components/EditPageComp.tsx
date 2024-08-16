@@ -40,6 +40,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
   const [buyPaymentType, setBuyPaymentType] = useState<PaymentType>(product.buyPaymentType);
 
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
+  const [boughtAt, setBoughtAt] = useState<moment.Moment | null>(product.boughtAt ? moment(product.boughtAt) : null);
+  const [soldAt, setSoldAt] = useState<moment.Moment | null>(product.soldAt ? moment(product.soldAt) : null);
 
   const handleAddAttribute = () => {
     setAttributes([...attributes, { name: "", value: "" }]);
@@ -189,7 +191,8 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         {/* Bought At */}
         <Grid item xs={12} sm={6}>
           <DatePicker
-            defaultValue={product.boughtAt ? moment(product.boughtAt) : undefined}
+            value={boughtAt}
+            onChange={(e) => setBoughtAt(e)}
             name="boughtAt"
             label="Buying Date"
             sx={{ width: "100%" }}
@@ -197,7 +200,20 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         </Grid>
         {/* Buy Price */}
         <Grid item xs={12} sm={6}>
-          <TextField name="buyPrice" defaultValue={product.buyPrice} fullWidth label="Buying Price" type="number" />
+          <TextField
+            name="buyPrice"
+            defaultValue={product.buyPrice}
+            onChange={(e) => {
+              if (Number(e.target.value) > 0) {
+                if (boughtAt === null) setBoughtAt(moment());
+              } else {
+                setBoughtAt(null);
+              }
+            }}
+            fullWidth
+            label="Buying Price"
+            type="number"
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
@@ -290,13 +306,27 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         <Grid item xs={12} sm={6}>
           <DatePicker
             name="soldAt"
-            defaultValue={product.soldAt ? moment(product.soldAt) : undefined}
+            value={soldAt}
+            onChange={(e) => setSoldAt(e)}
             label="Sell Date"
             sx={{ width: "100%" }}
           />
         </Grid>
         <Grid item xs={12} sm={6}>
-          <TextField name="sellPrice" defaultValue={product.sellPrice} fullWidth label="Sell Price" type="number" />
+          <TextField
+            name="sellPrice"
+            onChange={(e) => {
+              if (Number(e.target.value) > 0) {
+                if (soldAt === null) setSoldAt(moment());
+              } else {
+                setSoldAt(null);
+              }
+            }}
+            defaultValue={product.sellPrice}
+            fullWidth
+            label="Sell Price"
+            type="number"
+          />
         </Grid>
         <Grid item xs={12} sm={6}>
           <TextField
