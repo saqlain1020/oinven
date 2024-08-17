@@ -1,21 +1,24 @@
 "use client";
 import { LoadingButton } from "@mui/lab";
 import { Box, Button, Modal, Paper, TextField, Typography } from "@mui/material";
-import { DatePicker, DateTimePicker } from "@mui/x-date-pickers";
+import { DatePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
-import { addExpense } from "src/app/actions/expense";
+import { addLedgerEntry } from "src/app/actions/ledger";
 
-const AddExpenseModal = () => {
+const AddLedgerEntryModal = () => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [reason, setReason] = useState("");
+  const [particulars, setParticulars] = useState("");
   const [date, setDate] = useState(moment());
-  const [amount, setAmount] = useState("");
+  const [rate, setRate] = useState("");
+  const [credit, setCredit] = useState("");
+  const [debit, setDebit] = useState("");
+
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await addExpense(reason, date.toString(), Number(amount));
+      await addLedgerEntry(particulars, rate, Number(credit || 0), Number(debit || 0), date.toString());
       setOpen(false);
     } catch (error) {
       alert("Failed to add expense!");
@@ -28,15 +31,18 @@ const AddExpenseModal = () => {
     // Reset States
     if (!open) {
       setDate(moment());
-      setAmount("");
-      setReason("");
+      setRate("");
+      setCredit("");
+      setDebit("");
+      setParticulars("");
     }
   }, [open]);
+
   return (
     <Box>
       <Box className="center" sx={{ justifyContent: "flex-end" }}>
         <Button onClick={() => setOpen(true)} variant="outlined">
-          Add Expense
+          Add Entry
         </Button>
       </Box>
       <Modal
@@ -58,26 +64,47 @@ const AddExpenseModal = () => {
           elevation={20}
         >
           <Typography fontWeight="bold" id="modal-modal-title" variant="h5">
-            Add Expense
+            Add Entry
           </Typography>
           <TextField
-            label="Reason"
+            label="Particulars"
+            required
             fullWidth
             sx={{ mt: 2 }}
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            value={particulars}
+            onChange={(e) => setParticulars(e.target.value)}
           />
           <TextField
-            label="Amount"
+            label="Rate"
             type="number"
             // @ts-ignore
             onWheel={(e) => e.target.blur()}
             fullWidth
             sx={{ mt: 2 }}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={rate}
+            onChange={(e) => setRate(e.target.value)}
           />
-          <DateTimePicker
+          <TextField
+            label="Debit"
+            type="number"
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
+            fullWidth
+            sx={{ mt: 2 }}
+            value={debit}
+            onChange={(e) => setDebit(e.target.value)}
+          />
+          <TextField
+            label="Credit"
+            type="number"
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
+            fullWidth
+            sx={{ mt: 2 }}
+            value={credit}
+            onChange={(e) => setCredit(e.target.value)}
+          />
+          <DatePicker
             label="Date"
             sx={{ width: "100%", mt: 2 }}
             value={date}
@@ -90,9 +117,9 @@ const AddExpenseModal = () => {
             <LoadingButton
               loading={loading}
               type="submit"
+              onClick={handleAdd}
               loadingPosition="start"
               variant="contained"
-              onClick={handleAdd}
               sx={{ width: 100 }}
             >
               Add
@@ -104,4 +131,4 @@ const AddExpenseModal = () => {
   );
 };
 
-export default AddExpenseModal;
+export default AddLedgerEntryModal;

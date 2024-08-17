@@ -26,6 +26,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import PaymentsIcon from "@mui/icons-material/Payments";
 import SellIcon from "@mui/icons-material/Sell";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 
 const drawerWidth = 240;
 
@@ -103,6 +104,11 @@ const routes = [
     name: "Sales",
     path: "/sales",
     icon: <SellIcon />,
+  },
+  {
+    name: "Ledger",
+    path: "/ledger",
+    icon: <MenuBookIcon />,
   },
   {
     name: "Manage Users",
