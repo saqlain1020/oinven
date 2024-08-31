@@ -1,16 +1,24 @@
 import mongoose, { Model, Document } from "mongoose";
+import LedgerMember from "./LedgerMembers";
 
 export interface ILedger extends Document {
   date: Date;
   rate: number;
-  credit: number;
-  debit: number;
+  amount: number;
+  balance: number;
   particulars: string;
+  member: mongoose.Schema.Types.ObjectId;
   _id: string;
 }
 
 const ledgerSchema = new mongoose.Schema<ILedger>(
   {
+    member: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: LedgerMember,
+      index: true,
+      required: true,
+    },
     particulars: {
       type: String,
       required: true,
@@ -22,12 +30,12 @@ const ledgerSchema = new mongoose.Schema<ILedger>(
     rate: {
       type: Number,
     },
-    credit: {
+    amount: {
       type: Number,
       required: true,
       default: 0,
     },
-    debit: {
+    balance: {
       type: Number,
       required: true,
       default: 0,

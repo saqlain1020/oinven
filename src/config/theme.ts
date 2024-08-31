@@ -54,6 +54,15 @@ const theme = createTheme({
         },
       },
     },
+    MuiAccordion: {
+      defaultProps: {
+        slotProps: {
+          transition: {
+            unmountOnExit: true,
+          },
+        },
+      },
+    },
     MuiDivider: {
       variants: [
         {

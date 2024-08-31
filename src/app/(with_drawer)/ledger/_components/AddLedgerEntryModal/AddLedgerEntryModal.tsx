@@ -1,24 +1,38 @@
 "use client";
 import { LoadingButton } from "@mui/lab";
-import { Box, Button, Modal, Paper, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Modal, Paper, TextField, Typography } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { addLedgerEntry } from "src/app/actions/ledger";
+import { ILedgerMember } from "../../../../../../lib/models/LedgerMembers";
+import { useSWRConfig } from "swr";
+import swrKeys from "src/config/swrKeys";
 
-const AddLedgerEntryModal = () => {
+interface Props {
+  members: ILedgerMember[];
+}
+
+const AddLedgerEntryModal: React.FC<Props> = ({ members }) => {
   const [open, setOpen] = useState(false);
+  const { mutate } = useSWRConfig();
   const [loading, setLoading] = useState(false);
   const [particulars, setParticulars] = useState("");
   const [date, setDate] = useState(moment());
   const [rate, setRate] = useState("");
   const [credit, setCredit] = useState("");
   const [debit, setDebit] = useState("");
+  const [memberName, setMemberName] = useState("");
 
-  const handleAdd = async () => {
+  const handleAdd = async (e: any) => {
+    e.preventDefault();
     setLoading(true);
     try {
-      await addLedgerEntry(particulars, rate, Number(credit || 0), Number(debit || 0), date.toString());
+      let amount = Number(credit) - Number(debit);
+      const memberId = members.find((item) => item.name === memberName)?._id;
+      await addLedgerEntry(particulars, rate, amount, date.toString(), memberId, memberName);
+      if (memberId) mutate(swrKeys.ledgerMemberEntriesById(memberId));
+
       setOpen(false);
     } catch (error) {
       alert("Failed to add expense!");
@@ -52,6 +66,8 @@ const AddLedgerEntryModal = () => {
         aria-describedby="modal-modal-description"
       >
         <Paper
+          component={"form"}
+          onSubmit={handleAdd}
           sx={{
             position: "absolute" as "absolute",
             top: "50%",
@@ -66,6 +82,16 @@ const AddLedgerEntryModal = () => {
           <Typography fontWeight="bold" id="modal-modal-title" variant="h5">
             Add Entry
           </Typography>
+          <Autocomplete
+            freeSolo
+            options={members.map((item) => item.name)}
+            value={memberName}
+            fullWidth
+            renderInput={(params) => <TextField required {...params} onChange={(e) => setMemberName(e.target.value)} />}
+            onChange={(_, v) => {
+              setMemberName(v || "");
+            }}
+          />
           <TextField
             label="Particulars"
             required
@@ -117,7 +143,6 @@ const AddLedgerEntryModal = () => {
             <LoadingButton
               loading={loading}
               type="submit"
-              onClick={handleAdd}
               loadingPosition="start"
               variant="contained"
               sx={{ width: 100 }}

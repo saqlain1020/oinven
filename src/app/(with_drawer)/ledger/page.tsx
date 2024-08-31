@@ -1,14 +1,16 @@
 import { Box } from "@mui/material";
-import LedgerTable from "./_components/LedgerTable/LedgerTable";
 import AddLedgerEntryModal from "./_components/AddLedgerEntryModal/AddLedgerEntryModal";
-import { getLedger } from "src/app/actions/ledger";
+import { getLedgerMembers } from "src/app/actions/ledger";
+import MainLedgerContent from "./_components/MainLedgerContent/MainLedgerContent";
 
 export default async function Page() {
-  const data = await getLedger();
+  const members = await getLedgerMembers();
   return (
     <Box>
-      <AddLedgerEntryModal />
-      <LedgerTable data={data} />
+      {/* @ts-ignore */}
+      <AddLedgerEntryModal members={members} />
+      {/* @ts-ignore */}
+      <MainLedgerContent members={members} />
     </Box>
   );
 }
