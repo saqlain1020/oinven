@@ -12,6 +12,7 @@ export enum PaymentType {
 
 export let AttributesOptions = [
   "Imei",
+  "Imei-2",
   "Color",
   "Storage",
   "Battery Health",
@@ -19,4 +20,5 @@ export let AttributesOptions = [
   "CPLC",
   "Ram",
   "Condition",
+  "Pta",
 ];
