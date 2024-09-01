@@ -79,7 +79,7 @@ const AddLedgerEntryModal: React.FC<Props> = ({ members }) => {
           }}
           elevation={20}
         >
-          <Typography fontWeight="bold" id="modal-modal-title" variant="h5">
+          <Typography fontWeight="bold" id="modal-modal-title" variant="h5" sx={{ mb: 1 }}>
             Add Entry
           </Typography>
           <Autocomplete
@@ -87,7 +87,9 @@ const AddLedgerEntryModal: React.FC<Props> = ({ members }) => {
             options={members.map((item) => item.name)}
             value={memberName}
             fullWidth
-            renderInput={(params) => <TextField required {...params} onChange={(e) => setMemberName(e.target.value)} />}
+            renderInput={(params) => (
+              <TextField label="Shop/Name" required {...params} onChange={(e) => setMemberName(e.target.value)} />
+            )}
             onChange={(_, v) => {
               setMemberName(v || "");
             }}

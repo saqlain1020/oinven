@@ -11,11 +11,13 @@ const AddExpenseModal = () => {
   const [loading, setLoading] = useState(false);
   const [reason, setReason] = useState("");
   const [date, setDate] = useState(moment());
-  const [amount, setAmount] = useState("");
+  const [expenseAmount, setExpenseAmount] = useState("");
+  const [incomeAmount, setIncomeAmount] = useState("");
   const handleAdd = async () => {
     setLoading(true);
     try {
-      await addExpense(reason, date.toString(), Number(amount));
+      const amount = Number(expenseAmount) - Number(incomeAmount);
+      await addExpense(reason, date.toString(), amount);
       setOpen(false);
     } catch (error) {
       alert("Failed to add expense!");
@@ -28,7 +30,8 @@ const AddExpenseModal = () => {
     // Reset States
     if (!open) {
       setDate(moment());
-      setAmount("");
+      setExpenseAmount("");
+      setIncomeAmount("");
       setReason("");
     }
   }, [open]);
@@ -68,14 +71,24 @@ const AddExpenseModal = () => {
             onChange={(e) => setReason(e.target.value)}
           />
           <TextField
-            label="Amount"
+            label="Expense Amount"
             type="number"
             // @ts-ignore
             onWheel={(e) => e.target.blur()}
             fullWidth
             sx={{ mt: 2 }}
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={expenseAmount}
+            onChange={(e) => setExpenseAmount(e.target.value)}
+          />
+          <TextField
+            label="Income Amount"
+            type="number"
+            // @ts-ignore
+            onWheel={(e) => e.target.blur()}
+            fullWidth
+            sx={{ mt: 2 }}
+            value={incomeAmount}
+            onChange={(e) => setIncomeAmount(e.target.value)}
           />
           <DateTimePicker
             label="Date"

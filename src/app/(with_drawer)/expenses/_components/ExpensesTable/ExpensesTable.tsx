@@ -54,11 +54,21 @@ const ExpensesTable: React.FC<{ data: IExpense[] }> = ({ data }) => {
             );
           },
         },
-
         {
           headerName: "Amount",
           field: "amount",
           flex: 1,
+          renderCell(params) {
+            return (
+              <Box className="center" sx={{ height: "100%", justifyContent: "flex-start" }}>
+                <Tooltip placement="top" title={params.value < 0 ? "Income" : "Expense"}>
+                  <Typography sx={{ fontSize: 14, color: params.value < 0 ? "green" : "red" }}>
+                    {Math.abs(params.value)}
+                  </Typography>
+                </Tooltip>
+              </Box>
+            );
+          },
         },
         {
           headerName: "Actions",
