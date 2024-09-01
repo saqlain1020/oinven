@@ -124,6 +124,12 @@ export async function getSales() {
               $ne: ["$sellPrice", null],
             },
           },
+          {
+            paymentType: PaymentType.Hybrid,
+            $expr: {
+              $ne: ["$sellPrice", null],
+            },
+          },
         ],
       },
     },
@@ -202,6 +208,14 @@ export async function getTodaysData() {
             },
           },
           {
+            paymentType: PaymentType.Hybrid,
+            sellPrice: { $exists: true },
+            soldAt: {
+              $gte: todayStart,
+              $lte: todayEnd,
+            },
+          },
+          {
             paymentType: PaymentType.Credit,
             payments: {
               $elemMatch: {
@@ -222,6 +236,14 @@ export async function getTodaysData() {
           },
           {
             buyPaymentType: PaymentType.Account,
+            buyPrice: { $exists: true },
+            boughtAt: {
+              $gte: todayStart,
+              $lte: todayEnd,
+            },
+          },
+          {
+            buyPaymentType: PaymentType.Hybrid,
             buyPrice: { $exists: true },
             boughtAt: {
               $gte: todayStart,

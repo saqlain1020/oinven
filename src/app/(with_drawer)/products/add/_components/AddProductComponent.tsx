@@ -239,6 +239,7 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
             <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
             <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
             <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
+            <MenuItem value={PaymentType.Hybrid}>{PaymentType.Hybrid}</MenuItem>
           </TextField>
         </Grid>
         {buyPaymentType === PaymentType.Credit && (
@@ -356,6 +357,7 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
             <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
             <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
             <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
+            <MenuItem value={PaymentType.Hybrid}>{PaymentType.Hybrid}</MenuItem>
           </TextField>
         </Grid>
         {paymentType === PaymentType.Credit && (

@@ -229,6 +229,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
             <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
             <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
             <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
+            <MenuItem value={PaymentType.Hybrid}>{PaymentType.Hybrid}</MenuItem>
           </TextField>
         </Grid>
         {buyPaymentType === PaymentType.Credit && (
@@ -346,6 +347,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
             <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
             <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
             <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
+            <MenuItem value={PaymentType.Hybrid}>{PaymentType.Hybrid}</MenuItem>
           </TextField>
         </Grid>
         {/* Payments */}
