@@ -37,6 +37,7 @@ const AddProductComponent: React.FC<{ attributeNames: string[]; oldProduct?: IPr
       { name: AttributesOptions[4], value: "" },
       { name: AttributesOptions[5], value: "" },
       { name: AttributesOptions[6], value: "" },
+      { name: AttributesOptions[9], value: "" },
     ]
   );
   const [payments, setPayments] = useState<{ date: moment.Moment; amount: number }[]>([]);

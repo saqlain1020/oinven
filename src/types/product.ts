@@ -21,5 +21,5 @@ export let AttributesOptions = [
   "CPLC",
   "Ram",
   "Condition",
-  "Pta",
+  "PTA",
 ];
