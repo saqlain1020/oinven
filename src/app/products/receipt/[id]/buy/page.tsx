@@ -30,9 +30,13 @@ export default async function Page({ params }: { params: { id: string } }) {
     <Box sx={{ background: "white" }}>
       <Container sx={{ py: 2, minHeight: "100dvh" }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Typography textAlign="center" color="rgba(0,0,0,0.8)" variant="h5" fontWeight={"bold"} sx={{ mt: 1 }}>
-            Osama Enterprises
-          </Typography>
+          <Typography
+            textAlign="center"
+            color="rgba(0,0,0,0.8)"
+            variant="h5"
+            fontWeight={"bold"}
+            sx={{ mt: 1 }}
+          ></Typography>
           <Box>
             <Typography textAlign="center" color="rgba(58,58,58)" variant="h3">
               INVOICE
