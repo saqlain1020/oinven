@@ -30,14 +30,26 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
   attributeNames,
 }) => {
   const [attributes, setAttributes] = useState<{ name: string; value: string }[]>(product.attributes);
-  const [payments, setPayments] = useState<{ date: moment.Moment; amount: number }[]>(
-    product.payments.map((item) => ({ date: moment(item.date), amount: item.amount }))
+  const [payments, setPayments] = useState<
+    { date: moment.Moment; amount: number; type: PaymentType; account?: string }[]
+  >(
+    product.payments.map((item) => ({
+      date: moment(item.date),
+      amount: item.amount,
+      type: item.type,
+      account: item.account,
+    }))
   );
-  const [buyPayments, setBuyPayments] = useState<{ date: moment.Moment; amount: number }[]>(
-    product.buyPayments.map((item) => ({ date: moment(item.date), amount: item.amount }))
+  const [buyPayments, setBuyPayments] = useState<
+    { date: moment.Moment; amount: number; type: PaymentType; account?: string }[]
+  >(
+    product.buyPayments.map((item) => ({
+      date: moment(item.date),
+      amount: item.amount,
+      type: item.type,
+      account: item.account,
+    }))
   );
-  const [paymentType, setPaymentType] = useState<PaymentType>(product.paymentType);
-  const [buyPaymentType, setBuyPaymentType] = useState<PaymentType>(product.buyPaymentType);
 
   const [state, formAction] = useFormState(createOrUpdateProduct, null);
   const [boughtAt, setBoughtAt] = useState<moment.Moment | null>(product.boughtAt ? moment(product.boughtAt) : null);
@@ -48,10 +60,10 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
   };
 
   const handleAddPayment = () => {
-    setPayments([...payments, { date: moment(), amount: 0 }]);
+    setPayments([...payments, { date: moment(), amount: 0, type: PaymentType.Cash }]);
   };
   const handleAddBuyPayment = () => {
-    setBuyPayments([...buyPayments, { date: moment(), amount: 0 }]);
+    setBuyPayments([...buyPayments, { date: moment(), amount: 0, type: PaymentType.Cash }]);
   };
   const handleAttributeChange = (index: number, name: string, value: string) => {
     const newAttributes = [...attributes];
@@ -59,14 +71,26 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
     setAttributes(newAttributes);
   };
 
-  const handlePaymentChange = (index: number, date: moment.Moment, amount: number) => {
+  const handlePaymentChange = (
+    index: number,
+    date: moment.Moment,
+    amount: number,
+    type: PaymentType,
+    account?: string
+  ) => {
     const newPayments = [...payments];
-    newPayments[index] = { date, amount };
+    newPayments[index] = { date, amount, type, account };
     setPayments(newPayments);
   };
-  const handleBuyPaymentChange = (index: number, date: moment.Moment, amount: number) => {
+  const handleBuyPaymentChange = (
+    index: number,
+    date: moment.Moment,
+    amount: number,
+    type: PaymentType,
+    account?: string
+  ) => {
     const newPayments = [...buyPayments];
-    newPayments[index] = { date, amount };
+    newPayments[index] = { date, amount, type, account };
     setBuyPayments(newPayments);
   };
 
@@ -217,65 +241,80 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
             type="number"
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            value={buyPaymentType}
-            onChange={(e) => setBuyPaymentType(e.target.value as PaymentType)}
-            select
-            name="buyPaymentType"
-            fullWidth
-            label="Payment Type"
-          >
-            <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
-            <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
-            <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
-            <MenuItem value={PaymentType.Hybrid}>{PaymentType.Hybrid}</MenuItem>
-          </TextField>
+        {/* Payments */}
+        <Grid item xs={12}>
+          <Typography fontWeight={600} variant="h6">
+            Payments (Total: {buyPayments.reduce((prev, acc) => prev + acc.amount, 0)})
+          </Typography>
         </Grid>
-        {buyPaymentType === PaymentType.Credit && (
-          <>
-            {/* Payments */}
-            <Grid item xs={12}>
-              <Typography fontWeight={600} variant="h6">
-                Payments (Total: {buyPayments.reduce((prev, acc) => prev + acc.amount, 0)})
-              </Typography>
-            </Grid>
-            {buyPayments.map((item, i) => (
-              <Grid key={i} item xs={12}>
-                <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "1fr 1fr max-content", alignItems: "center" }}>
-                  <DatePicker
-                    name={`buyPayments.${i}.date`}
-                    label="Payment Date"
-                    sx={{ width: "100%" }}
-                    value={item.date}
-                    onChange={(v) => handleBuyPaymentChange(i, v || moment(), item.amount)}
-                  />
-                  <TextField
-                    name={`buyPayments.${i}.amount`}
-                    fullWidth
-                    label="Payment Amount"
-                    value={item.amount}
-                    required
-                    type="number"
-                    // @ts-ignore
-                    onWheel={(e) => e.target.blur()}
-                    onChange={(e) => handleBuyPaymentChange(i, item.date, Number(e.target.value))}
-                  />
-                  <IconButton onClick={() => deleteBuyPayment(i)}>
-                    <Delete />
-                  </IconButton>
-                </Box>
-              </Grid>
-            ))}
-            <Grid item xs={12}>
-              <Box className="center">
-                <Button variant="outlined" onClick={() => handleAddBuyPayment()}>
-                  Add Payment
-                </Button>
-              </Box>
-            </Grid>
-          </>
-        )}
+        {buyPayments.map((item, i) => (
+          <Grid key={i} item xs={12}>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 3,
+                gridTemplateColumns: {
+                  md: item.type === PaymentType.Account ? "1fr 1fr 1fr 1fr max-content" : "1fr 1fr 1fr max-content",
+                  sm: "1fr",
+                },
+                alignItems: "center",
+              }}
+            >
+              <DatePicker
+                name={`buyPayments.${i}.date`}
+                label="Payment Date"
+                sx={{ width: "100%" }}
+                value={item.date}
+                onChange={(v) => handleBuyPaymentChange(i, v || moment(), item.amount, item.type, item.account)}
+              />
+              <TextField
+                name={`buyPayments.${i}.amount`}
+                fullWidth
+                label="Payment Amount"
+                value={item.amount}
+                required
+                type="number"
+                // @ts-ignore
+                onWheel={(e) => e.target.blur()}
+                onChange={(e) => handleBuyPaymentChange(i, item.date, Number(e.target.value), item.type, item.account)}
+              />
+              <TextField
+                name={`buyPayments.${i}.type`}
+                value={item.type}
+                select
+                fullWidth
+                label="Medium"
+                onChange={(e) =>
+                  handleBuyPaymentChange(i, item.date, item.amount, e.target.value as PaymentType, item.account)
+                }
+              >
+                <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
+                <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
+              </TextField>
+              {item.type === PaymentType.Account && (
+                <TextField
+                  name={`buyPayments.${i}.account`}
+                  fullWidth
+                  value={item.account}
+                  label="Account"
+                  type="number"
+                  required
+                  onChange={(e) => handleBuyPaymentChange(i, item.date, item.amount, item.type, e.target.value)}
+                />
+              )}
+              <IconButton onClick={() => deleteBuyPayment(i)}>
+                <Delete />
+              </IconButton>
+            </Box>
+          </Grid>
+        ))}
+        <Grid item xs={12}>
+          <Box className="center">
+            <Button variant="outlined" onClick={() => handleAddBuyPayment()}>
+              Add Payment
+            </Button>
+          </Box>
+        </Grid>
         {
           // #endregion Buy
         }
@@ -335,69 +374,81 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
             onWheel={(e) => e.target.blur()}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            value={paymentType}
-            onChange={(e) => setPaymentType(e.target.value as PaymentType)}
-            select
-            name="paymentType"
-            fullWidth
-            label="Payment Type"
-          >
-            <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
-            <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
-            <MenuItem value={PaymentType.Credit}>{PaymentType.Credit}</MenuItem>
-            <MenuItem value={PaymentType.Hybrid}>{PaymentType.Hybrid}</MenuItem>
-          </TextField>
-        </Grid>
+
         {/* Payments */}
-        {paymentType === PaymentType.Credit && (
-          <>
-            <Grid item xs={12}>
-              <Typography fontWeight={600} variant="h6">
-                Payments (Total: {payments.reduce((prev, acc) => prev + acc.amount, 0)})
-              </Typography>
-            </Grid>
-            {payments.map((item, i) => (
-              <Grid key={i} item xs={12}>
-                <Box sx={{ display: "grid", gap: 3, gridTemplateColumns: "1fr 1fr max-content", alignItems: "center" }}>
-                  <DatePicker
-                    name={`payments.${i}.date`}
-                    label="Payment Date"
-                    sx={{ width: "100%" }}
-                    value={item.date}
-                    onChange={(v) => handlePaymentChange(i, v || moment(), item.amount)}
-                  />
-                  <TextField
-                    name={`payments.${i}.amount`}
-                    fullWidth
-                    label="Payment Amount"
-                    type="number"
-                    // @ts-ignore
-                    onWheel={(e) => e.target.blur()}
-                    value={item.amount}
-                    onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value))}
-                  />
-                  <IconButton onClick={() => deletePayment(i)}>
-                    <Delete />
-                  </IconButton>
-                </Box>
-              </Grid>
-            ))}
-            <Grid item xs={12}>
-              <Box className="center">
-                <Button variant="outlined" onClick={() => handleAddPayment()}>
-                  Add Payment
-                </Button>
-              </Box>
-            </Grid>
-          </>
-        )}
-        {paymentType === PaymentType.Account && (
-          <Grid item xs={12} sm={6}>
-            <TextField name="paymentAccount" defaultValue={product.paymentAccount} fullWidth label="Account No." />
+        <Grid item xs={12}>
+          <Typography fontWeight={600} variant="h6">
+            Payments (Total: {payments.reduce((prev, acc) => prev + acc.amount, 0)})
+          </Typography>
+        </Grid>
+        {payments.map((item, i) => (
+          <Grid key={i} item xs={12}>
+            <Box
+              sx={{
+                display: "grid",
+                gap: 3,
+                gridTemplateColumns: {
+                  md: item.type === PaymentType.Account ? "1fr 1fr 1fr 1fr max-content" : "1fr 1fr 1fr max-content",
+                  sm: "1fr",
+                },
+                alignItems: "center",
+              }}
+            >
+              <DatePicker
+                name={`payments.${i}.date`}
+                label="Payment Date"
+                sx={{ width: "100%" }}
+                value={item.date}
+                onChange={(v) => handlePaymentChange(i, v || moment(), item.amount, item.type, item.account)}
+              />
+              <TextField
+                name={`payments.${i}.amount`}
+                fullWidth
+                label="Payment Amount"
+                type="number"
+                // @ts-ignore
+                onWheel={(e) => e.target.blur()}
+                value={item.amount}
+                onChange={(e) => handlePaymentChange(i, item.date, Number(e.target.value), item.type, item.account)}
+              />
+              <TextField
+                name={`payments.${i}.type`}
+                value={item.type}
+                select
+                fullWidth
+                label="Medium"
+                onChange={(e) =>
+                  handlePaymentChange(i, item.date, item.amount, e.target.value as PaymentType, item.account)
+                }
+              >
+                <MenuItem value={PaymentType.Cash}>{PaymentType.Cash}</MenuItem>
+                <MenuItem value={PaymentType.Account}>{PaymentType.Account}</MenuItem>
+              </TextField>
+              {item.type === PaymentType.Account && (
+                <TextField
+                  name={`payments.${i}.account`}
+                  fullWidth
+                  value={item.account}
+                  label="Account"
+                  type="number"
+                  required
+                  onChange={(e) => handlePaymentChange(i, item.date, item.amount, item.type, e.target.value)}
+                />
+              )}
+              <IconButton onClick={() => deletePayment(i)}>
+                <Delete />
+              </IconButton>
+            </Box>
           </Grid>
-        )}
+        ))}
+        <Grid item xs={12}>
+          <Box className="center">
+            <Button variant="outlined" onClick={() => handleAddPayment()}>
+              Add Payment
+            </Button>
+          </Box>
+        </Grid>
+
         {
           // #endregion Sell
         }

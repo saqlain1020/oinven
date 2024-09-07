@@ -7,8 +7,6 @@ export enum ProductCategory {
 export enum PaymentType {
   Cash = "Cash",
   Account = "Account",
-  Hybrid = "Hybrid",
-  Credit = "Credit",
 }
 
 export let AttributesOptions = [

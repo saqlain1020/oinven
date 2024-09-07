@@ -16,7 +16,7 @@ const sxStyles = makeStyles((theme) => ({
 }));
 
 export default async function Home() {
-  const { profit, todayBought, todaySold, todayCreditPaid, todayCreditReceived, todayExpense } = await getTodaysData();
+  const { profit, todayExpense, todayBought, todaySold } = await getTodaysData();
   const { monthBought, monthSold, monthProfit, monthExpense } = await getCurrentMonthsData();
   const { weekBought, weekExpense, weekProfit, weekSold } = await getCurrentWeekData();
   const creditsRecevingItems = await getCreditsToReceive();
@@ -62,26 +62,6 @@ export default async function Home() {
             </Typography>
             <Typography fontWeight={600} variant="h6">
               {todaySold.toLocaleString()}
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ p: 2 }}>
-            <Typography variant="body2" color="grey">
-              Today Credit Paid
-            </Typography>
-            <Typography fontWeight={600} variant="h6" color="red">
-              {todayCreditPaid.toLocaleString()}
-            </Typography>
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Card sx={{ p: 2 }}>
-            <Typography variant="body2" color="grey">
-              Today Credit Received
-            </Typography>
-            <Typography fontWeight={600} variant="h6" color="green">
-              {todayCreditReceived.toLocaleString()}
             </Typography>
           </Card>
         </Grid>

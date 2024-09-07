@@ -73,6 +73,7 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     }
     obj.soldTo = soldTo!._id;
   }
+  console.log('obj =>', obj);
   if (obj.productId) {
     const product = await Product.findOneAndUpdate({ _id: obj.productId }, obj, { new: true });
     revalidatePath("/products/edit/" + obj.productId);
@@ -105,29 +106,15 @@ export async function getSales() {
     },
     {
       $match: {
-        $or: [
+        $and: [
           {
-            paymentType: PaymentType.Credit,
+            $expr: {
+              $ne: ["$sellPrice", null],
+            },
+          },
+          {
             $expr: {
               $eq: ["$sellPrice", "$paymentsAmount"],
-            },
-          },
-          {
-            paymentType: PaymentType.Cash,
-            $expr: {
-              $ne: ["$sellPrice", null],
-            },
-          },
-          {
-            paymentType: PaymentType.Account,
-            $expr: {
-              $ne: ["$sellPrice", null],
-            },
-          },
-          {
-            paymentType: PaymentType.Hybrid,
-            $expr: {
-              $ne: ["$sellPrice", null],
             },
           },
         ],
@@ -192,31 +179,6 @@ export async function getTodaysData() {
       $match: {
         $or: [
           {
-            paymentType: PaymentType.Cash,
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: todayStart,
-              $lte: todayEnd,
-            },
-          },
-          {
-            paymentType: PaymentType.Account,
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: todayStart,
-              $lte: todayEnd,
-            },
-          },
-          {
-            paymentType: PaymentType.Hybrid,
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: todayStart,
-              $lte: todayEnd,
-            },
-          },
-          {
-            paymentType: PaymentType.Credit,
             payments: {
               $elemMatch: {
                 date: {
@@ -227,31 +189,6 @@ export async function getTodaysData() {
             },
           },
           {
-            buyPaymentType: PaymentType.Cash,
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: todayStart,
-              $lte: todayEnd,
-            },
-          },
-          {
-            buyPaymentType: PaymentType.Account,
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: todayStart,
-              $lte: todayEnd,
-            },
-          },
-          {
-            buyPaymentType: PaymentType.Hybrid,
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: todayStart,
-              $lte: todayEnd,
-            },
-          },
-          {
-            buyPaymentType: PaymentType.Credit,
             buyPayments: {
               $elemMatch: {
                 date: {
@@ -267,36 +204,15 @@ export async function getTodaysData() {
   ]);
 
   const expenses = await Expense.find({ date: { $gte: todayStart, $lte: todayEnd } }).lean();
-  /** Items that are bought on full payment today */
+
   const todayBoughtItems = data.filter((item) => {
-    if (item.buyPaymentType !== PaymentType.Credit && moment(item.boughtAt).isBetween(todayStart, todayEnd, null, "[]"))
-      return true;
-    return false;
+    return item.buyPayments.some((ele) => moment(ele.date).isBetween(todayStart, todayEnd, null, "[]"));
   });
-  /** Items that are sold on full payment today */
   const todaySoldItems = data.filter((item) => {
-    if (item.paymentType !== PaymentType.Credit && moment(item.soldAt).isBetween(todayStart, todayEnd, null, "[]"))
-      return true;
-    return false;
-  });
-  /** Items that have been bought with credit and has atleast one credit transaction on current day */
-  const todayBoughtCreditItems = data.filter((item) => {
-    if (item.buyPaymentType === PaymentType.Credit) {
-      return item.buyPayments.some((ele) => moment(ele.date).isBetween(todayStart, todayEnd, null, "[]"));
-    }
-    return false;
-  });
-  /** Items that have been sold with credit and has atleast one credit transaction on current day */
-  const todaySoldCreditItems = data.filter((item) => {
-    if (item.paymentType === PaymentType.Credit) {
-      return item.payments.some((ele) => moment(ele.date).isBetween(todayStart, todayEnd, null, "[]"));
-    }
-    return false;
+    return item.payments.some((ele) => moment(ele.date).isBetween(todayStart, todayEnd, null, "[]"));
   });
 
-  const todayBought = todayBoughtItems.reduce((acc, item) => acc + item.buyPrice, 0);
-  const todaySold = todaySoldItems.reduce((acc, item) => acc + item.sellPrice, 0);
-  const todayCreditPaid = todayBoughtCreditItems.reduce((acc, item) => {
+  const todayAmountPaid = todayBoughtItems.reduce((acc, item) => {
     let amountToBeAdded = 0;
     item.buyPayments.forEach((ele) => {
       if (moment(ele.date).isBetween(todayStart, todayEnd, null, "[]")) {
@@ -305,7 +221,7 @@ export async function getTodaysData() {
     });
     return acc + amountToBeAdded;
   }, 0);
-  const todayCreditReceived = todaySoldCreditItems.reduce((acc, item) => {
+  const todayAmountReceived = todaySoldItems.reduce((acc, item) => {
     let amountToBeAdded = 0;
     item.payments.forEach((ele) => {
       if (moment(ele.date).isBetween(todayStart, todayEnd, null, "[]")) {
@@ -316,17 +232,11 @@ export async function getTodaysData() {
   }, 0);
   const todayExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
 
-  const profit = todaySold - todayBought - todayCreditPaid + todayCreditReceived - todayExpense;
+  const profit = todayAmountReceived - todayAmountPaid - todayExpense;
   return {
-    todayBoughtItems,
-    todaySoldItems,
+    todayBought: todayAmountPaid,
+    todaySold: todayAmountReceived,
     todayExpense,
-    todayBoughtCreditItems,
-    todaySoldCreditItems,
-    todayBought,
-    todaySold,
-    todayCreditPaid,
-    todayCreditReceived,
     profit,
   };
 }
@@ -339,23 +249,6 @@ export async function getCurrentMonthsData() {
       $match: {
         $or: [
           {
-            paymentType: "Cash",
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: monthStart,
-              $lte: monthEnd,
-            },
-          },
-          {
-            paymentType: "Account",
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: monthStart,
-              $lte: monthEnd,
-            },
-          },
-          {
-            paymentType: "Credit",
             payments: {
               $elemMatch: {
                 date: {
@@ -366,23 +259,6 @@ export async function getCurrentMonthsData() {
             },
           },
           {
-            buyPaymentType: "Cash",
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: monthStart,
-              $lte: monthEnd,
-            },
-          },
-          {
-            buyPaymentType: "Account",
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: monthStart,
-              $lte: monthEnd,
-            },
-          },
-          {
-            buyPaymentType: "Credit",
             buyPayments: {
               $elemMatch: {
                 date: {
@@ -396,56 +272,48 @@ export async function getCurrentMonthsData() {
       },
     },
   ]);
+
   const expenses = await Expense.find({
     date: {
       $gte: monthStart,
       $lte: monthEnd,
     },
   }).lean();
-  // const isInToday = someMoment.isBetween(todayStart, todayEnd, null, '[]');
-  const monthBoughtItems = data.filter((item) => {
-    if (item.buyPaymentType !== PaymentType.Credit && moment(item.boughtAt).isBetween(monthStart, monthEnd, null, "[]"))
-      return true;
 
-    // Check for credit clearance
-    if (item.buyPaymentType === PaymentType.Credit) {
-      const hasCreditThisTime = item.buyPayments.some((ele) =>
-        moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")
-      );
-      const totalPayments = item.buyPayments.reduce((acc, curr) => {
-        return acc + curr.amount;
-      }, 0);
-      if (totalPayments === item.buyPrice && hasCreditThisTime) return true;
-    }
-    return false;
+  const monthBoughtItems = data.filter((item) => {
+    return item.buyPayments.some((ele) => moment(ele.date).isBetween(monthStart, monthEnd, null, "[]"));
   });
   const monthSoldItems = data.filter((item) => {
-    if (item.paymentType !== PaymentType.Credit && moment(item.soldAt).isBetween(monthStart, monthEnd, null, "[]"))
-      return true;
-    // Check for credit clearance
-    if (item.paymentType === PaymentType.Credit) {
-      const hasCreditThisTime = item.payments.some((ele) =>
-        moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")
-      );
-      const totalPayments = item.payments.reduce((acc, curr) => {
-        return acc + curr.amount;
-      }, 0);
-      if (totalPayments === item.sellPrice && hasCreditThisTime) return true;
-    }
-    return false;
+    return item.payments.some((ele) => moment(ele.date).isBetween(monthStart, monthEnd, null, "[]"));
   });
-  const monthBought = monthBoughtItems.reduce((acc, item) => {
-    return acc + item.buyPrice;
+
+  const monthAmountPaid = monthBoughtItems.reduce((acc, item) => {
+    let amountToBeAdded = 0;
+    item.buyPayments.forEach((ele) => {
+      if (moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")) {
+        amountToBeAdded += ele.amount;
+      }
+    });
+    return acc + amountToBeAdded;
   }, 0);
-  const monthSold = monthSoldItems.reduce((acc, item) => {
-    return acc + item.sellPrice;
+  const monthAmountReceived = monthSoldItems.reduce((acc, item) => {
+    let amountToBeAdded = 0;
+    item.payments.forEach((ele) => {
+      if (moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")) {
+        amountToBeAdded += ele.amount;
+      }
+    });
+    return acc + amountToBeAdded;
   }, 0);
   const monthExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
+
+  const profit = monthAmountReceived - monthAmountPaid - monthExpense;
+
   return {
-    monthBought,
-    monthSold,
+    monthBought: monthAmountPaid,
+    monthSold: monthAmountReceived,
     monthExpense,
-    monthProfit: monthSold - monthBought - monthExpense,
+    monthProfit: profit,
   };
 }
 export async function getCurrentWeekData() {
@@ -457,23 +325,6 @@ export async function getCurrentWeekData() {
       $match: {
         $or: [
           {
-            paymentType: "Cash",
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: weekStart,
-              $lte: weekEnd,
-            },
-          },
-          {
-            paymentType: "Account",
-            sellPrice: { $exists: true },
-            soldAt: {
-              $gte: weekStart,
-              $lte: weekEnd,
-            },
-          },
-          {
-            paymentType: "Credit",
             payments: {
               $elemMatch: {
                 date: {
@@ -484,23 +335,6 @@ export async function getCurrentWeekData() {
             },
           },
           {
-            buyPaymentType: "Cash",
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: weekStart,
-              $lte: weekEnd,
-            },
-          },
-          {
-            buyPaymentType: "Account",
-            buyPrice: { $exists: true },
-            boughtAt: {
-              $gte: weekStart,
-              $lte: weekEnd,
-            },
-          },
-          {
-            buyPaymentType: "Credit",
             buyPayments: {
               $elemMatch: {
                 date: {
@@ -514,63 +348,54 @@ export async function getCurrentWeekData() {
       },
     },
   ]);
+
   const expenses = await Expense.find({
     date: {
       $gte: weekStart,
       $lte: weekEnd,
     },
   }).lean();
-  // const isInToday = someMoment.isBetween(todayStart, todayEnd, null, '[]');
-  const weekBoughtItems = data.filter((item) => {
-    if (item.buyPaymentType !== PaymentType.Credit && moment(item.boughtAt).isBetween(weekStart, weekEnd, null, "[]"))
-      return true;
 
-    // Check for credit clearance
-    if (item.buyPaymentType === PaymentType.Credit) {
-      const hasCreditThisTime = item.buyPayments.some((ele) =>
-        moment(ele.date).isBetween(weekStart, weekEnd, null, "[]")
-      );
-      const totalPayments = item.buyPayments.reduce((acc, curr) => {
-        return acc + curr.amount;
-      }, 0);
-      if (totalPayments === item.buyPrice && hasCreditThisTime) return true;
-    }
-    return false;
+  const weekBoughtItems = data.filter((item) => {
+    return item.buyPayments.some((ele) => moment(ele.date).isBetween(weekStart, weekEnd, null, "[]"));
   });
   const weekSoldItems = data.filter((item) => {
-    if (item.paymentType !== PaymentType.Credit && moment(item.soldAt).isBetween(weekStart, weekEnd, null, "[]"))
-      return true;
-    // Check for credit clearance
-    if (item.paymentType === PaymentType.Credit) {
-      const hasCreditThisTime = item.payments.some((ele) => moment(ele.date).isBetween(weekStart, weekEnd, null, "[]"));
-      const totalPayments = item.payments.reduce((acc, curr) => {
-        return acc + curr.amount;
-      }, 0);
-      if (totalPayments === item.sellPrice && hasCreditThisTime) return true;
-    }
-    return false;
+    return item.payments.some((ele) => moment(ele.date).isBetween(weekStart, weekEnd, null, "[]"));
   });
-  const weekBought = weekBoughtItems.reduce((acc, item) => {
-    return acc + item.buyPrice;
+
+  const weekAmountPaid = weekBoughtItems.reduce((acc, item) => {
+    let amountToBeAdded = 0;
+    item.buyPayments.forEach((ele) => {
+      if (moment(ele.date).isBetween(weekStart, weekEnd, null, "[]")) {
+        amountToBeAdded += ele.amount;
+      }
+    });
+    return acc + amountToBeAdded;
   }, 0);
-  const weekSold = weekSoldItems.reduce((acc, item) => {
-    return acc + item.sellPrice;
+  const weekAmountReceived = weekSoldItems.reduce((acc, item) => {
+    let amountToBeAdded = 0;
+    item.payments.forEach((ele) => {
+      if (moment(ele.date).isBetween(weekStart, weekEnd, null, "[]")) {
+        amountToBeAdded += ele.amount;
+      }
+    });
+    return acc + amountToBeAdded;
   }, 0);
   const weekExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
+
+  const profit = weekAmountReceived - weekAmountPaid - weekExpense;
   return {
-    weekBought,
-    weekSold,
+    weekBought: weekAmountPaid,
+    weekSold: weekAmountReceived,
     weekExpense,
-    weekProfit: weekSold - weekBought - weekExpense,
+    weekProfit: profit,
   };
 }
 
 export async function getCreditsToReceive() {
   const data = await Product.aggregate<IProductPopulated>([
     {
-      $match: {
-        paymentType: PaymentType.Credit,
-      },
+      $match: {},
     },
     {
       $addFields: {
@@ -607,9 +432,7 @@ export async function getCreditsToReceive() {
 export async function getCreditsToPay() {
   const data = await Product.aggregate<IProductPopulated>([
     {
-      $match: {
-        buyPaymentType: PaymentType.Credit,
-      },
+      $match: {},
     },
     {
       $addFields: {
