@@ -22,166 +22,178 @@ const sxStyles = makeStyles((theme) => ({
 
 export default async function Page({ params }: { params: { id: string } }) {
   const product = await getProduct(params.id);
-  let paidAmount = product.buyPrice;
-  if (product.buyPaymentType === PaymentType.Credit) {
-    paidAmount = product.buyPayments.reduce((acc, curr) => acc + curr.amount, 0);
-  }
+  let paidAmount = product.buyPayments.reduce((acc, curr) => acc + curr.amount, 0);
   return (
-    <Box sx={{ background: "white" }}>
-      <Container sx={{ py: 2, minHeight: "100dvh" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <Typography
-            textAlign="center"
-            color="rgba(0,0,0,0.8)"
-            variant="h5"
-            fontWeight={"bold"}
-            sx={{ mt: 1 }}
-          ></Typography>
-          <Box>
-            <Typography textAlign="center" color="rgba(58,58,58)" variant="h3">
-              INVOICE
-            </Typography>
-            <Typography color="GrayText" variant="h6" textAlign={"right"}>
-              # BUY
-            </Typography>
+    <Box sx={{ background: "white", height: "100%" }}>
+      <Container sx={{ py: 2, height: "100%", display: "flex", flexFlow: "column", justifyContent: "space-between" }}>
+        <Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <Typography
+              textAlign="center"
+              color="rgba(0,0,0,0.8)"
+              variant="h5"
+              fontWeight={"bold"}
+              sx={{ mt: 1 }}
+            ></Typography>
+            <Box>
+              <Typography textAlign="center" color="rgba(58,58,58)" variant="h3">
+                INVOICE
+              </Typography>
+              <Typography color="GrayText" variant="h6" textAlign={"right"}>
+                # BUY
+              </Typography>
+            </Box>
           </Box>
-        </Box>
 
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={6}>
-            <Typography color="GrayText" variant="h6">
-              Bill To:{" "}
-              <Typography fontWeight="bold" component="b" color="rgb(58,58,58)">
-                {product.boughtFrom?.name}
+          <Grid container spacing={2} sx={{ mt: 2 }}>
+            <Grid item xs={6}>
+              <Typography color="GrayText" variant="h6">
+                Bill To:{" "}
+                <Typography fontWeight="bold" component="b" color="rgb(58,58,58)">
+                  {product.boughtFrom?.name}
+                </Typography>
               </Typography>
-            </Typography>
-            <Box sx={{ display: "flex" }}>
-              <Typography color="GrayText">NIC:</Typography>
-              <Typography fontWeight={"bold"} sx={{ ml: 3.5 }}>
-                {product.boughtFrom?.nic}
-              </Typography>
-            </Box>
-            <Box sx={{ display: "flex" }}>
-              <Typography color="GrayText">Phone:</Typography>
-              <Typography fontWeight={"bold"} sx={{ ml: 1 }}>
-                {product.boughtFrom?.phone}
-              </Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={6}>
-            <Box sx={sxStyles.row}>
-              <Typography textAlign="right" color="GrayText">
-                Date
-              </Typography>
-              <Typography textAlign="right" sx={{ pr: 2 }}>
-                {moment(product.boughtAt).format("DD-MMM-YYYY")}
-              </Typography>
-            </Box>
-            <Box sx={sxStyles.row}>
-              <Typography textAlign="right" color="GrayText">
-                Payment Terms:
-              </Typography>
-              <Typography textAlign="right" sx={{ pr: 2 }}>
-                {product.buyPaymentType}
-              </Typography>
-            </Box>
-            <Box sx={[sxStyles.row, { background: "rgba(0,0,0,0.1)", borderRadius: 2, p: 1, pr: 2 }]}>
-              <Typography textAlign="right" variant="h6" fontWeight="bold">
-                Balance Due:
-              </Typography>
-              <Typography textAlign="right" variant="h6" fontWeight={700}>
-                PKR {(product.buyPrice - paidAmount).toLocaleString()}
-              </Typography>
-            </Box>
-          </Grid>
-        </Grid>
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: "5fr 1fr 2fr 2fr",
-            background: "rgb(58,58,58)",
-            color: "white",
-            p: 1,
-            px: 4,
-            mt: 2,
-            borderRadius: 2,
-          }}
-        >
-          <Typography>Item</Typography>
-          <Typography textAlign="center">Quantity</Typography>
-          <Typography textAlign="right">Rate</Typography>
-          <Typography textAlign="right">Amount</Typography>
-        </Box>
-        <Box sx={sxStyles.itemContentRow}>
-          <Box>
-            <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
-              {product.name}
-            </Typography>
-            {product.attributes.map((item, i) => (
-              <Box key={i} sx={{ display: "flex", gap: 1, alignItems: "center", mt: 1, ml: 2 }}>
-                <Box sx={{ width: 5, height: 5, borderRadius: 360, background: "grey" }} />
-                <Typography color="GrayText">{item.name}:</Typography>
-                <Typography>{item.value}</Typography>
+              <Box sx={{ display: "flex" }}>
+                <Typography color="GrayText">NIC:</Typography>
+                <Typography fontWeight={"bold"} sx={{ ml: 3.5 }}>
+                  {product.boughtFrom?.nic}
+                </Typography>
               </Box>
-            ))}
+              <Box sx={{ display: "flex" }}>
+                <Typography color="GrayText">Phone:</Typography>
+                <Typography fontWeight={"bold"} sx={{ ml: 1 }}>
+                  {product.boughtFrom?.phone}
+                </Typography>
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box sx={sxStyles.row}>
+                <Typography textAlign="right" color="GrayText">
+                  Date
+                </Typography>
+                <Typography textAlign="right" sx={{ pr: 2 }}>
+                  {moment(product.boughtAt).format("DD-MMM-YYYY")}
+                </Typography>
+              </Box>
+              <Box sx={[sxStyles.row, { background: "rgba(0,0,0,0.1)", borderRadius: 2, p: 1, pr: 2 }]}>
+                <Typography textAlign="right" variant="h6" fontWeight="bold">
+                  Balance Due:
+                </Typography>
+                <Typography textAlign="right" variant="h6" fontWeight={700}>
+                  PKR {(product.buyPrice - paidAmount).toLocaleString()}
+                </Typography>
+              </Box>
+            </Grid>
+          </Grid>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "5fr 1fr 2fr 2fr",
+              background: "rgb(58,58,58)",
+              color: "white",
+              p: 1,
+              px: 4,
+              mt: 2,
+              borderRadius: 2,
+            }}
+          >
+            <Typography>Item</Typography>
+            <Typography textAlign="center">Quantity</Typography>
+            <Typography textAlign="right">Rate</Typography>
+            <Typography textAlign="right">Amount</Typography>
           </Box>
-          <Box>
-            <Typography textAlign={"center"}>1</Typography>
-          </Box>
-          <Box>
-            <Typography textAlign={"right"}>Rs {product.buyPrice.toLocaleString()}</Typography>
-          </Box>
-          <Box>
-            <Typography textAlign={"right"}>Rs {product.buyPrice.toLocaleString()}</Typography>
-          </Box>
-        </Box>
-        {product.buyPaymentType === PaymentType.Credit && (
-          <Divider variant="light" sx={{ width: "90%", mx: "auto", mt: 2 }} />
-        )}
-        {product.buyPayments.map((item, i) => (
-          <Box key={i} sx={sxStyles.itemContentRow}>
+          <Box sx={sxStyles.itemContentRow}>
             <Box>
               <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
-                {moment(item.date).format("DD-MMM-YYYY")}
+                {product.name}
               </Typography>
+              {product.attributes.map((item, i) => (
+                <Box key={i} sx={{ display: "flex", gap: 1, alignItems: "center", mt: 1, ml: 2 }}>
+                  <Box sx={{ width: 5, height: 5, borderRadius: 360, background: "grey" }} />
+                  <Typography color="GrayText">{item.name}:</Typography>
+                  <Typography>{item.value}</Typography>
+                </Box>
+              ))}
             </Box>
-            <Box></Box>
-            <Box></Box>
             <Box>
-              <Typography textAlign={"right"}>Rs {item.amount.toLocaleString()}</Typography>
+              <Typography textAlign={"center"}>1</Typography>
+            </Box>
+            <Box>
+              <Typography textAlign={"right"}>Rs {product.buyPrice.toLocaleString()}</Typography>
+            </Box>
+            <Box>
+              <Typography textAlign={"right"}>Rs {product.buyPrice.toLocaleString()}</Typography>
             </Box>
           </Box>
-        ))}
-        <Grid container spacing={2} sx={{ mt: 6 }}>
-          <Grid item xs={6}></Grid>
-          <Grid item xs={6}>
-            <Box sx={sxStyles.row}>
-              <Typography textAlign="right" color="GrayText">
-                Total:
-              </Typography>
-              <Typography textAlign="right" sx={{ pr: 2 }}>
-                Rs {product.buyPrice.toLocaleString()}
-              </Typography>
+          <Divider variant="light" sx={{ width: "90%", mx: "auto", mt: 2 }} />
+          {product.buyPayments.map((item, i) => (
+            <Box key={i} sx={sxStyles.itemContentRow}>
+              <Box>
+                <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
+                  {moment(item.date).format("DD-MMM-YYYY")} | {item.type} {item.account && `(${item.account})`}
+                </Typography>
+              </Box>
+              <Box></Box>
+              <Box></Box>
+              <Box>
+                <Typography textAlign={"right"}>Rs {item.amount.toLocaleString()}</Typography>
+              </Box>
             </Box>
-            <Box sx={sxStyles.row}>
-              <Typography textAlign="right" color="GrayText">
-                Amount Paid:
-              </Typography>
-              <Typography textAlign="right" sx={{ pr: 2 }}>
-                Rs {paidAmount.toLocaleString()}
-              </Typography>
-            </Box>
+          ))}
+          <Grid container spacing={2} sx={{ mt: 6 }}>
+            <Grid item xs={6}></Grid>
+            <Grid item xs={6}>
+              <Box sx={sxStyles.row}>
+                <Typography textAlign="right" color="GrayText">
+                  Total:
+                </Typography>
+                <Typography textAlign="right" sx={{ pr: 2 }}>
+                  Rs {product.buyPrice.toLocaleString()}
+                </Typography>
+              </Box>
+              <Box sx={sxStyles.row}>
+                <Typography textAlign="right" color="GrayText">
+                  Amount Paid:
+                </Typography>
+                <Typography textAlign="right" sx={{ pr: 2 }}>
+                  Rs {paidAmount.toLocaleString()}
+                </Typography>
+              </Box>
+            </Grid>
           </Grid>
-        </Grid>
-        <Typography color="GrayText" sx={{ mt: 1 }}>
-          Terms:
-        </Typography>
-        <Typography color="rgb(58,58,58)">No warranty of camera, touch, and lcd after leaving counter.</Typography>
+        </Box>
+        <Box>
+          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+            <Box>
+              <Typography color="GrayText" sx={{ mt: 1 }}>
+                Terms:
+              </Typography>
+              <Typography color="rgb(58,58,58)">
+                No warranty of camera, touch, and lcd after leaving counter.
+              </Typography>
+            </Box>
 
-        <Box sx={{ position: "relative", ml: "auto", mt: 5, width: "20em" }}>
-          <Box sx={{ borderBottom: "1px solid black" }} />
-          <Typography variant="h6" fontWeight="bold" textAlign="center">
-            Stamp
+            <Box sx={{ position: "relative", ml: "auto", mt: 5, width: "15em" }}>
+              <Box sx={{ borderBottom: "1px solid black" }} />
+              <Typography fontWeight="bold" textAlign="center">
+                Stamp
+              </Typography>
+            </Box>
+          </Box>
+          <Typography
+            color="rgb(58,58,58)"
+            fontWeight={"bold"}
+            align="center"
+            sx={{
+              borderRadius: 4,
+              px: 2,
+              py: 1,
+              mt: 2,
+              // width: "max-content",
+              background: "rgba(0,0,0,0.1)",
+            }}
+          >
+            Shop No. G-91, Ground Floor, Amma Tower, Near Naaz Plaza, Saddar Karachi.
           </Typography>
         </Box>
       </Container>
