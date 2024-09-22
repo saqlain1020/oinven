@@ -235,15 +235,20 @@ export async function getTodaysData() {
   const todayProfitAdd = todaySoldItems.reduce((acc, item) => {
     let totalPayments = 0;
     let todayPayment = 0;
+    let totalPaymentBeforeToday = 0;
     item.payments.forEach((ele) => {
       totalPayments += ele.amount;
       if (moment(ele.date).isBetween(todayStart, todayEnd, null, "[]")) {
         todayPayment += ele.amount;
+      } else {
+        totalPaymentBeforeToday += ele.amount;
       }
     });
     let profit = 0;
-    if (totalPayments > item.buyPrice) {
+    if (totalPaymentBeforeToday > item.buyPrice) {
       profit = todayPayment;
+    } else {
+      profit = totalPayments - item.buyPrice;
     }
     return acc + profit;
   }, 0);
@@ -322,19 +327,23 @@ export async function getCurrentMonthsData() {
     return acc + amountToBeAdded;
   }, 0);
   const monthExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
-
   const monthProfitAdd = monthSoldItems.reduce((acc, item) => {
     let totalPayments = 0;
     let todayPayment = 0;
+    let totalPaymentBeforeToday = 0;
     item.payments.forEach((ele) => {
       totalPayments += ele.amount;
       if (moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")) {
         todayPayment += ele.amount;
+      } else {
+        totalPaymentBeforeToday += ele.amount;
       }
     });
     let profit = 0;
-    if (totalPayments > item.buyPrice) {
+    if (totalPaymentBeforeToday > item.buyPrice) {
       profit = todayPayment;
+    } else {
+      profit = totalPayments - item.buyPrice;
     }
     return acc + profit;
   }, 0);
@@ -418,15 +427,20 @@ export async function getCurrentWeekData() {
   const weekProfitAdd = weekSoldItems.reduce((acc, item) => {
     let totalPayments = 0;
     let todayPayment = 0;
+    let totalPaymentBeforeToday = 0;
     item.payments.forEach((ele) => {
       totalPayments += ele.amount;
       if (moment(ele.date).isBetween(weekStart, weekEnd, null, "[]")) {
         todayPayment += ele.amount;
+      } else {
+        totalPaymentBeforeToday += ele.amount;
       }
     });
     let profit = 0;
-    if (totalPayments > item.buyPrice) {
+    if (totalPaymentBeforeToday > item.buyPrice) {
       profit = todayPayment;
+    } else {
+      profit = totalPayments - item.buyPrice;
     }
     return acc + profit;
   }, 0);
