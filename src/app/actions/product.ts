@@ -73,7 +73,7 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     }
     obj.soldTo = soldTo!._id;
   }
-  console.log('obj =>', obj);
+  console.log("obj =>", obj);
   if (obj.productId) {
     const product = await Product.findOneAndUpdate({ _id: obj.productId }, obj, { new: true });
     revalidatePath("/products/edit/" + obj.productId);
@@ -232,7 +232,23 @@ export async function getTodaysData() {
   }, 0);
   const todayExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
 
-  const profit = todayAmountReceived - todayAmountPaid - todayExpense;
+  const todayProfitAdd = todaySoldItems.reduce((acc, item) => {
+    let totalPayments = 0;
+    let todayPayment = 0;
+    item.payments.forEach((ele) => {
+      totalPayments += ele.amount;
+      if (moment(ele.date).isBetween(todayStart, todayEnd, null, "[]")) {
+        todayPayment += ele.amount;
+      }
+    });
+    let profit = 0;
+    if (totalPayments > item.buyPrice) {
+      profit = todayPayment;
+    }
+    return acc + profit;
+  }, 0);
+
+  const profit = todayProfitAdd - todayExpense;
   return {
     todayBought: todayAmountPaid,
     todaySold: todayAmountReceived,
@@ -307,7 +323,23 @@ export async function getCurrentMonthsData() {
   }, 0);
   const monthExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
 
-  const profit = monthAmountReceived - monthAmountPaid - monthExpense;
+  const monthProfitAdd = monthSoldItems.reduce((acc, item) => {
+    let totalPayments = 0;
+    let todayPayment = 0;
+    item.payments.forEach((ele) => {
+      totalPayments += ele.amount;
+      if (moment(ele.date).isBetween(monthStart, monthEnd, null, "[]")) {
+        todayPayment += ele.amount;
+      }
+    });
+    let profit = 0;
+    if (totalPayments > item.buyPrice) {
+      profit = todayPayment;
+    }
+    return acc + profit;
+  }, 0);
+
+  const profit = monthProfitAdd - monthExpense;
 
   return {
     monthBought: monthAmountPaid,
@@ -383,7 +415,23 @@ export async function getCurrentWeekData() {
   }, 0);
   const weekExpense = expenses.reduce((acc, item) => acc + item.amount, 0);
 
-  const profit = weekAmountReceived - weekAmountPaid - weekExpense;
+  const weekProfitAdd = weekSoldItems.reduce((acc, item) => {
+    let totalPayments = 0;
+    let todayPayment = 0;
+    item.payments.forEach((ele) => {
+      totalPayments += ele.amount;
+      if (moment(ele.date).isBetween(weekStart, weekEnd, null, "[]")) {
+        todayPayment += ele.amount;
+      }
+    });
+    let profit = 0;
+    if (totalPayments > item.buyPrice) {
+      profit = todayPayment;
+    }
+    return acc + profit;
+  }, 0);
+
+  const profit = weekProfitAdd - weekExpense;
   return {
     weekBought: weekAmountPaid,
     weekSold: weekAmountReceived,
