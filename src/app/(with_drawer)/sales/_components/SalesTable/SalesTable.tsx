@@ -7,6 +7,8 @@ import { Delete, Edit } from "@mui/icons-material";
 import { useRouter } from "next/navigation";
 import moment from "moment";
 import Link from "next/link";
+import { useFormState } from "react-dom";
+import { deleteProduct } from "src/app/actions/product";
 
 const columns: GridColDef<IProductPopulated>[] = [
   {
@@ -88,6 +90,7 @@ const columns: GridColDef<IProductPopulated>[] = [
 ];
 const SalesTable: React.FC<{ data: IProductPopulated[] }> = ({ data }) => {
   const router = useRouter();
+  const [_, formAction] = useFormState(deleteProduct, null);
   const rows = useMemo(() => {
     return data.map((item) => {
       const imei = item.attributes.find((item) => item.name.toLowerCase().includes("imei"))?.value;
@@ -129,7 +132,7 @@ const SalesTable: React.FC<{ data: IProductPopulated[] }> = ({ data }) => {
                   <IconButton size="small" onClick={() => router.push(`products/edit/${params.row._id}`)}>
                     <Edit fontSize="small" />
                   </IconButton>
-                  <IconButton size="small">
+                  <IconButton size="small" onClick={() => formAction(params.row._id)}>
                     <Delete fontSize="small" />
                   </IconButton>
                 </Box>
