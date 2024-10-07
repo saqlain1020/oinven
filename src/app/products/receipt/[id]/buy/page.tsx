@@ -193,7 +193,7 @@ export default async function Page({ params }: { params: { id: string } }) {
               background: "rgba(0,0,0,0.1)",
             }}
           >
-            Shop No. G-91, Ground Floor, Amma Tower, Near Naaz Plaza, Saddar Karachi.
+            Shop No. G-91, Ground Floor, Amma Tower, Near Naz Plaza, Saddar Karachi.
           </Typography>
         </Box>
       </Container>

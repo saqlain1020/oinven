@@ -168,12 +168,12 @@ export default async function Page({ params }: { params: { id: string } }) {
           <Box>
             <Box sx={{ display: "flex", justifyContent: "space-between" }}>
               <Box>
-                <Typography color="GrayText" sx={{ mt: 1 }}>
+                {/* <Typography color="GrayText" sx={{ mt: 1 }}>
                   Terms:
                 </Typography>
                 <Typography color="rgb(58,58,58)">
                   No warranty of camera, touch, and lcd after leaving counter.
-                </Typography>
+                </Typography> */}
               </Box>
 
               <Box sx={{ position: "relative", ml: "auto", mt: 5, width: "15em" }}>
@@ -196,7 +196,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                 background: "rgba(0,0,0,0.1)",
               }}
             >
-              Shop No. G-91, Ground Floor, Amma Tower, Near Naaz Plaza, Saddar Karachi.
+              Shop No. G-91, Ground Floor, Amma Tower, Near Naz Plaza, Saddar Karachi.
             </Typography>
           </Box>
         </Container>
