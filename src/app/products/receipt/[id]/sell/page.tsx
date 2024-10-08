@@ -26,8 +26,10 @@ export default async function Page({ params }: { params: { id: string } }) {
   let paidAmount = product.payments.reduce((acc, curr) => acc + curr.amount, 0);
   return (
     <>
-      <Box sx={{ background: "white", height: "100%" }}>
-        <Container sx={{ py: 2, height: "100%", display: "flex", flexFlow: "column", justifyContent: "space-between" }}>
+      <Box sx={{ background: "white" }}>
+        <Container
+          sx={{ py: 2, minHeight: "100dvh", display: "flex", flexFlow: "column", justifyContent: "space-between" }}
+        >
           <Box>
             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
               <Typography
