@@ -16,8 +16,10 @@ export let AttributesOptions = [
   "Storage",
   "Battery Health",
   "Manufacturer",
-  "CPLC",
+  "CPLC Status",
+  "CPLC Counter",
+  "Accessories",
+  "PTA",
   "Ram",
   "Condition",
-  "PTA",
 ];
