@@ -165,12 +165,12 @@ export default async function Page({ params }: { params: { id: string } }) {
         <Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
             <Box>
-              <Typography color="GrayText" sx={{ mt: 1 }}>
+              {/* <Typography color="GrayText" sx={{ mt: 1 }}>
                 Terms:
               </Typography>
               <Typography color="rgb(58,58,58)">
                 No warranty of camera, touch, and lcd after leaving counter.
-              </Typography>
+              </Typography> */}
             </Box>
 
             <Box sx={{ position: "relative", ml: "auto", mt: 5, width: "15em" }}>
