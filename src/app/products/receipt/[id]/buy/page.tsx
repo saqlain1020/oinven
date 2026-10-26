@@ -2,7 +2,7 @@ import { Box, Container, Divider, Grid, Typography } from "@mui/material";
 import moment from "moment";
 import { getProduct } from "src/app/actions/product";
 import { makeStyles } from "src/hooks/useSxStyles";
-import { PaymentType } from "src/types/product";
+import PaymentsSummary from "../../_components/PaymentsSummary";
 
 const sxStyles = makeStyles((theme) => ({
   row: {
@@ -30,13 +30,12 @@ export default async function Page({ params }: { params: { id: string } }) {
       >
         <Box>
           <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <Typography
-              textAlign="center"
-              color="rgba(0,0,0,0.8)"
-              variant="h5"
-              fontWeight={"bold"}
-              sx={{ mt: 1 }}
-            ></Typography>
+            <Box sx={{ mt: 1 }}>
+              <Typography color="#8C5A32" variant="h4" fontWeight={"bold"}>
+                Prime Tech
+              </Typography>
+              <Typography color="GrayText">Phone: 0306-2217011</Typography>
+            </Box>
             <Box>
               <Typography textAlign="center" color="rgba(58,58,58)" variant="h3">
                 INVOICE
@@ -77,7 +76,7 @@ export default async function Page({ params }: { params: { id: string } }) {
                   {moment(product.boughtAt).format("DD-MMM-YYYY")}
                 </Typography>
               </Box>
-              <Box sx={[sxStyles.row, { background: "rgba(0,0,0,0.1)", borderRadius: 2, p: 1, pr: 2 }]}>
+              <Box sx={[sxStyles.row, { background: "rgba(140,90,50,0.12)", borderRadius: 2, p: 1, pr: 2 }]}>
                 <Typography textAlign="right" variant="h6" fontWeight="bold">
                   Balance Due:
                 </Typography>
@@ -91,7 +90,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             sx={{
               display: "grid",
               gridTemplateColumns: "5fr 1fr 2fr 2fr",
-              background: "rgb(58,58,58)",
+              background: "#3B2416",
               color: "white",
               p: 1,
               px: 4,
@@ -128,41 +127,7 @@ export default async function Page({ params }: { params: { id: string } }) {
             </Box>
           </Box>
           <Divider variant="light" sx={{ width: "90%", mx: "auto", mt: 2 }} />
-          {product.buyPayments.map((item, i) => (
-            <Box key={i} sx={sxStyles.itemContentRow}>
-              <Box>
-                <Typography textAlign={"left"} color="rgb(58,58,58)" fontWeight="bold">
-                  {moment(item.date).format("DD-MMM-YYYY")} | {item.type} {item.account && `(${item.account})`}
-                </Typography>
-              </Box>
-              <Box></Box>
-              <Box></Box>
-              <Box>
-                <Typography textAlign={"right"}>Rs {item.amount.toLocaleString()}</Typography>
-              </Box>
-            </Box>
-          ))}
-          <Grid container spacing={2} sx={{ mt: 6 }}>
-            <Grid item xs={6}></Grid>
-            <Grid item xs={6}>
-              <Box sx={sxStyles.row}>
-                <Typography textAlign="right" color="GrayText">
-                  Total:
-                </Typography>
-                <Typography textAlign="right" sx={{ pr: 2 }}>
-                  Rs {product.buyPrice.toLocaleString()}
-                </Typography>
-              </Box>
-              <Box sx={sxStyles.row}>
-                <Typography textAlign="right" color="GrayText">
-                  Amount Paid:
-                </Typography>
-                <Typography textAlign="right" sx={{ pr: 2 }}>
-                  Rs {paidAmount.toLocaleString()}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
+          <PaymentsSummary payments={product.buyPayments} total={product.buyPrice} />
         </Box>
         <Box>
           <Box sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -192,10 +157,10 @@ export default async function Page({ params }: { params: { id: string } }) {
               py: 1,
               mt: 2,
               // width: "max-content",
-              background: "rgba(0,0,0,0.1)",
+              background: "rgba(140,90,50,0.12)",
             }}
           >
-            Shop No. G-91, Ground Floor, Amma Tower, Near Naz Plaza, Saddar Karachi.
+            Shop # F-50, Prime Tech, Amma Tower Saddar, Karachi | Phone: 0306-2217011
           </Typography>
         </Box>
       </Container>

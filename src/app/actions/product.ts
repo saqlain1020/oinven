@@ -14,9 +14,11 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
   let obj = {
     attributes: [] as { name: string; value: string }[],
     payments: [] as { date: Date; amount: number }[],
+    buyPayments: [] as { date: Date; amount: number }[],
   } as {
     attributes: { name: string; value: string }[];
     payments: { date: Date; amount: number }[];
+    buyPayments: { date: Date; amount: number }[];
     name: string;
     category: string;
     description?: string;
@@ -37,7 +39,7 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
     productId?: string;
   };
   formData.forEach((value, key) => {
-    if (key.split(".")[0] === "attributes" || key.split(".")[0] === "payments") {
+    if (["attributes", "payments", "buyPayments"].includes(key.split(".")[0])) {
       const keyName = key.split(".")[0];
       const index = Number(key.split(".")[1]);
       // @ts-ignore
@@ -51,6 +53,10 @@ export async function createOrUpdateProduct(prev: any, formData: FormData) {
       obj[key] = value;
     }
   });
+  // Keep installments in date order so receipts show the running balance correctly
+  const byDate = (a: { date: Date }, b: { date: Date }) => new Date(a.date).getTime() - new Date(b.date).getTime();
+  obj.payments = obj.payments.filter(Boolean).sort(byDate);
+  obj.buyPayments = obj.buyPayments.filter(Boolean).sort(byDate);
   if (obj.buyingNic) {
     let boughtFrom = await Customer.findOne({ nic: obj.buyingNic });
     if (!boughtFrom) {

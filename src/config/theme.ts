@@ -15,20 +15,35 @@ const roboto = Roboto({
   display: "swap",
 });
 export const inter = Inter({ subsets: ["latin"] });
-const themeColor = "rgb(182,255,0)";
-// const themeColor = "#5ada86";
+// Prime Tech palette: copper / bronze / brown
+export const brandColors = {
+  copper: "#C8864E",
+  bronze: "#CD7F32",
+  darkBrown: "#3B2416",
+  espresso: "#1C140F",
+  paper: "#2A1E17",
+};
+const themeColor = brandColors.copper;
 const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
       main: themeColor,
+      contrastText: brandColors.espresso,
+    },
+    secondary: {
+      main: brandColors.bronze,
+      contrastText: brandColors.espresso,
     },
     text: {
-      primary: "rgb(230, 230, 230)",
+      primary: "#F2E6DA",
+      secondary: "#BFA995",
     },
     background: {
-      default: "rgb(40,40,40)",
+      default: brandColors.espresso,
+      paper: brandColors.paper,
     },
+    divider: "rgba(200, 134, 78, 0.24)",
   },
   typography: {
     fontFamily: inter.style.fontFamily,
@@ -49,8 +64,8 @@ const theme = createTheme({
     MuiAppBar: {
       styleOverrides: {
         root: {
-          backgroundColor: themeColor,
-          color: "black",
+          background: `linear-gradient(90deg, ${brandColors.darkBrown} 0%, #8C5A32 55%, ${brandColors.copper} 100%)`,
+          color: "#F2E6DA",
         },
       },
     },

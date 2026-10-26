@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <LocalizationProvider dateAdapter={AdapterMoment}>
       <PersistentDrawerLeft>
-        {children} <ProgressBar height="4px" color="white" options={{ showSpinner: false }} shallowRouting />
+        {children} <ProgressBar height="4px" color="#CD7F32" options={{ showSpinner: false }} shallowRouting />
       </PersistentDrawerLeft>
     </LocalizationProvider>
   );

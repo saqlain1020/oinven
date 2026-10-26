@@ -26,7 +26,7 @@ export default async function Page() {
         {users.map((user, i) => (
           <ListItem key={i} secondaryAction={<DeleteUser email={user.email} />}>
             <ListItemIcon>
-              <CircleIcon sx={{ height: 10, width: 10, color: "black" }} />
+              <CircleIcon sx={{ height: 10, width: 10, color: "primary.main" }} />
             </ListItemIcon>
             <ListItemText primary={user.email} />
           </ListItem>

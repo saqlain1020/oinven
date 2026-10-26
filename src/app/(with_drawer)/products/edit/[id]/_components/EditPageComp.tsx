@@ -200,7 +200,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel htmlFor="formatted-text-mask-input" sx={{ background: "black" }}>
+            <InputLabel htmlFor="formatted-text-mask-input" sx={{ bgcolor: "background.default", px: 0.5 }}>
               NIC
             </InputLabel>
             <OutlinedInput
@@ -335,7 +335,7 @@ const EditPageComp: React.FC<{ product: IProductPopulated; attributeNames: strin
         </Grid>
         <Grid item xs={12} sm={6}>
           <FormControl fullWidth>
-            <InputLabel htmlFor="formatted-text-mask-input" sx={{ background: "black" }}>
+            <InputLabel htmlFor="formatted-text-mask-input" sx={{ bgcolor: "background.default", px: 0.5 }}>
               NIC
             </InputLabel>
             <OutlinedInput

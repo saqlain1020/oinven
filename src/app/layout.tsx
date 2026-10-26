@@ -7,8 +7,8 @@ import { ThemeProvider } from "@mui/material/styles";
 import theme from "src/config/theme";
 
 export const metadata: Metadata = {
-  title: "Inventory Mangement",
-  description: "Osama Enterprises Inventory Management System",
+  title: "Prime Tech",
+  description: "Prime Tech Inventory Management System",
 };
 
 export default async function RootLayout({

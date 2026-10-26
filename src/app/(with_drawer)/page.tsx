@@ -21,6 +21,12 @@ export default async function Home() {
   const { weekBought, weekExpense, weekProfit, weekSold } = await getCurrentWeekData();
   const creditsRecevingItems = await getCreditsToReceive();
   const creditsPayItems = await getCreditsToPay();
+  // Pending amount from customers who still owe part of the sale price
+  const amountToReceive = creditsRecevingItems.reduce((acc, item) => {
+    if (item.sellPrice == null) return acc;
+    const paid = item.payments.reduce((sum, p) => sum + p.amount, 0);
+    return acc + Math.max(item.sellPrice - paid, 0);
+  }, 0);
   return (
     <Box component={"main"}>
       <Grid container spacing={2} sx={{ mt: 1 }}>
@@ -165,6 +171,16 @@ export default async function Home() {
           <Typography fontWeight={"bold"} sx={{ mt: 2 }} variant="h5">
             Credits To Receive:-
           </Typography>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Card sx={{ p: 2 }} elevation={5}>
+            <Typography variant="body2" color="grey" textAlign="center">
+              Amount To Receive
+            </Typography>
+            <Typography textAlign="center" fontWeight={600} variant="h5">
+              {amountToReceive.toLocaleString()}
+            </Typography>
+          </Card>
         </Grid>
         <Grid item xs={12}>
           <CreditsTable type="sell" data={creditsRecevingItems} />
