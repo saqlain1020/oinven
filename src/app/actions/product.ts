@@ -494,7 +494,7 @@ export async function getCreditsToReceive() {
       },
     },
   ]);
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as IProductPopulated[];
 }
 
 export async function getCreditsToPay() {
@@ -531,5 +531,5 @@ export async function getCreditsToPay() {
       },
     },
   ]);
-  return JSON.parse(JSON.stringify(data));
+  return JSON.parse(JSON.stringify(data)) as IProductPopulated[];
 }

@@ -8,6 +8,7 @@ import {
   getTodaysData,
 } from "../actions/product";
 import CreditsTable from "src/components/CreditsTable/CreditsTable";
+import { IProductPopulated } from "../../../lib/models/Product";
 
 const sxStyles = makeStyles((theme) => ({
   root: {
@@ -22,9 +23,9 @@ export default async function Home() {
   const creditsRecevingItems = await getCreditsToReceive();
   const creditsPayItems = await getCreditsToPay();
   // Pending amount from customers who still owe part of the sale price
-  const amountToReceive = creditsRecevingItems.reduce((acc, item) => {
+  const amountToReceive = creditsRecevingItems.reduce((acc: number, item: IProductPopulated) => {
     if (item.sellPrice == null) return acc;
-    const paid = item.payments.reduce((sum, p) => sum + p.amount, 0);
+    const paid = item.payments.reduce((sum: number, p) => sum + p.amount, 0);
     return acc + Math.max(item.sellPrice - paid, 0);
   }, 0);
   return (
