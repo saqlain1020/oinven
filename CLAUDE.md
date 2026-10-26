@@ -7,16 +7,16 @@ can be paid in installments (credit). Also tracks shop expenses and a supplier/s
 
 ## Stack
 - Next.js 14.2 App Router + **Server Actions** (no REST API for app data), React 18, TypeScript
-- MongoDB via **Mongoose 8** (app models) + raw `MongoClient` (only for the NextAuth adapter) — both in `lib/db.ts`
-- NextAuth v5 beta (Google provider only), MongoDB adapter, `basePath: "/auth"`
+- MongoDB via **Mongoose 8** (connection opened in `lib/db.ts`, which also still exports an unused `MongoClient` promise)
+- NextAuth v5 beta, **Credentials provider** (username/password), JWT sessions, `basePath: "/auth"` (default NextAuth sign-in page)
 - MUI 5 (dark copper/bronze/brown theme — `brandColors` in `src/config/theme.ts`; primary copper `#C8864E`, secondary bronze `#CD7F32`, bg espresso `#1C140F`), MUI X DataGrid + DatePickers (moment adapter), `react-imask`, SWR (ledger only), `next-nprogress-bar`
 - Path aliases (tsconfig): `src/*` → `./src/*`, `auth` → `./auth`. Models are imported by relative path (`../../../lib/models/...`).
-- Env: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`, `MONGODB_URI` (template in `env.test`)
+- Env: `AUTH_SECRET`, `MONGODB_URI`, `ADMIN_USERNAME`, `ADMIN_PASSWORD` (template in `env.test`)
 - Scripts: `dev`, `build`, `start`, `lint`. No tests. Both `yarn.lock` and an untracked `bun.lock` exist.
 
 ## Graph: data model (Mongoose, `lib/models/`)
 ```
-AllowedUser {email unique}                         ← auth whitelist
+User {username unique lowercase, passwordHash (PBKDF2 "salt:hash", lib/password.ts), role: admin | user}
 Customer {name, nic unique, phone}                 ← looked up/created by NIC
 Product {
   name(idx), description, category: ProductCategory,
@@ -64,10 +64,10 @@ CPLC Status, CPLC Counter, Accessories, PTA, Ram, Condition). The add form pre-f
   - `modifyBalances(memberId)` (internal) — recomputes every entry's running `balance` sorted by date and
     writes `balance/particulars/lastAmount` (from the latest entry) to the LedgerMember
   - `getMemberLedgerEntries`, `getLedgerMembers`, `addLedgerMember`, `updateLedgerMember`, `deleteLedgerEntry`
-- **users.ts** → AllowedUser: `getAllowedUsers`, `addAllowedUser(formData)`, `deleteAllowedUser(formData)`
+- **users.ts** → User (admin-only, checked server-side): `getUsers`, `addUser`, `setUserPassword`, `deleteUser` (admin can't be deleted); plus `isAdmin()`, `userExists(id)`
 
 ## Graph: routes → components → actions
-Root `src/app/layout.tsx`: `auth()`; redirects to `auth/signin` if no session. MUI theme provider.
+Root `src/app/layout.tsx`: `auth()`; redirects to `/auth/signin` if no session or the user was deleted. MUI theme provider.
 `(with_drawer)/layout.tsx`: LocalizationProvider(moment) + `components/Drawer` (sidebar nav + signout) + progress bar.
 
 | Route | Page (server) | Client components | Actions |
@@ -79,7 +79,7 @@ Root `src/app/layout.tsx`: `auth()`; redirects to `auth/signin` if no session. M
 | `/sales` | `sales/page.tsx` | `sales/_components/SalesTable` (Rebuy/Edit/Delete) | getSales, deleteProduct |
 | `/expenses` | `expenses/page.tsx` | `AddExpenseModal`, `ExpensesTable` | add/get/deleteExpense |
 | `/ledger` | `ledger/page.tsx` | `AddLedgerEntryModal`, `MainLedgerContent` (accordion per member, SWR-loaded entries) | ledger actions; SWR keys in `src/config/swrKeys.ts` |
-| `/manage_users` | `manage_users/page.tsx` (server-only forms) | — | users actions |
+| `/manage_users` | `manage_users/page.tsx` (server-only forms; non-admins redirected to `/`) | — | users actions |
 | `/products/receipt/[id]/sell` | outside drawer; A4 print layout (`receipt/layout.css`) | — | getProduct → soldTo, payments, sellPrice |
 | `/products/receipt/[id]/buy` | same layout | — | getProduct → boughtFrom, buyPayments, buyPrice |
 | `/test` | scratch page, stale fields (`paymentType`) | — | direct Product.aggregate |
@@ -90,9 +90,11 @@ Receipts: "Prime Tech" + phone header, "INVOICE # SELL/BUY", customer name/NIC/p
 ("No warranty of camera, touch, and lcd after leaving counter."), stamp line, footer with shop address + phone. (The buy receipt has terms commented out.)
 
 ## Auth graph
-`middleware.ts` exports `auth` as middleware (matcher excludes api/_next/favicon). `auth.ts` `signIn` callback
-allows login only if the Google email exists in `AllowedUser`. The `authorized` callback returns true for all
-normal paths; the actual gate is the root layout redirect. Adding a user = `/manage_users`.
+`middleware.ts` exports `auth` as middleware (matcher excludes api/_next/favicon); `authorized` returns true, the real
+gate is the root layout redirect. `auth.ts` Credentials `authorize` looks up `User` by username and verifies the password.
+First run: if no admin exists and the login matches `ADMIN_USERNAME`/`ADMIN_PASSWORD`, the admin is created.
+`jwt`/`session` callbacks put `role` and `id` on `session.user`. Only the admin manages users at `/manage_users`.
+Other server actions are not role-checked (any logged-in user can use them).
 
 ## Conventions
 - Pages are async server components that call actions directly; interactive parts are `"use client"` components in `_components/`.
@@ -114,5 +116,5 @@ normal paths; the actual gate is the root layout redirect. Adding a user = `/man
 - Aggregates skip the `pre(/^find/)` populate, which is why they use a manual `$lookup`. `$unwind` without
   preserveNull drops products that have no customer.
 - Credits-to-receive also matches unsold items whose `sellPrice` is null (null ≠ 0) but have a `soldTo`.
-- `authorized` callback contains leftover example paths; `/test` page is dead code. (Old branding "Osama Enterprises" was replaced by "Prime Tech".)
+- `/test` page is dead code. (Old branding "Osama Enterprises" was replaced by "Prime Tech".)
 - The three period-stat functions are duplicated, so a fix in one must be made in all three.

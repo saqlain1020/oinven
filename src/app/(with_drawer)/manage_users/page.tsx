@@ -1,46 +1,38 @@
-import {
-  Box,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  OutlinedInput,
-  TextField,
-  Typography,
-} from "@mui/material";
-import { addAllowedUser, deleteAllowedUser, getAllowedUsers } from "src/app/actions/users";
-import CircleIcon from "@mui/icons-material/Circle";
+import { Box, Button, IconButton, List, ListItem, ListItemText, TextField, Typography } from "@mui/material";
+import { addUser, deleteUser, getUsers, isAdmin, setUserPassword } from "src/app/actions/users";
 import { Delete } from "@mui/icons-material";
-import SendIcon from "@mui/icons-material/Send";
+import { redirect } from "next/navigation";
+import { UserRole } from "../../../../lib/models/User";
 
 export default async function Page() {
-  const users = await getAllowedUsers();
+  if (!(await isAdmin())) redirect("/");
+  const users = await getUsers();
   return (
-    <Box sx={{ maxWidth: 500 }}>
+    <Box sx={{ maxWidth: 600 }}>
       <Typography variant="h5" fontWeight={"bold"}>
-        Allowed Users
+        Users
       </Typography>
-      <List sx={{ maxWidth: 500, mb: 2 }}>
-        {users.map((user, i) => (
-          <ListItem key={i} secondaryAction={<DeleteUser email={user.email} />}>
-            <ListItemIcon>
-              <CircleIcon sx={{ height: 10, width: 10, color: "primary.main" }} />
-            </ListItemIcon>
-            <ListItemText primary={user.email} />
+      <List sx={{ mb: 2 }}>
+        {users.map((user) => (
+          <ListItem
+            key={user._id}
+            sx={{ gap: 2, flexWrap: "wrap" }}
+            secondaryAction={user.role !== UserRole.Admin && <DeleteUser id={user._id} />}
+          >
+            <ListItemText primary={user.username} secondary={user.role} />
+            <SetPassword id={user._id} />
           </ListItem>
         ))}
       </List>
-      <SaveUsers />
+      <AddUser />
     </Box>
   );
 }
 
-function DeleteUser({ email }: { email: string }) {
+function DeleteUser({ id }: { id: string }) {
   return (
-    <form action={deleteAllowedUser}>
-      <input value={email} hidden name="email" />
+    <form action={deleteUser}>
+      <input value={id} hidden readOnly name="id" />
       <IconButton type="submit">
         <Delete />
       </IconButton>
@@ -48,22 +40,26 @@ function DeleteUser({ email }: { email: string }) {
   );
 }
 
-function SaveUsers() {
+function SetPassword({ id }: { id: string }) {
   return (
-    <form action={addAllowedUser}>
-      <TextField
-        fullWidth
-        name="email"
-        label="Enter Email"
-        type="email"
-        InputProps={{
-          endAdornment: (
-            <IconButton color="primary" type="submit">
-              <SendIcon fontSize="small" />
-            </IconButton>
-          ),
-        }}
-      />
+    <form action={setUserPassword} style={{ display: "flex", gap: 8, marginRight: 48 }}>
+      <input value={id} hidden readOnly name="id" />
+      <TextField size="small" name="password" type="password" label="New password" required />
+      <Button type="submit" variant="outlined" size="small">
+        Set
+      </Button>
+    </form>
+  );
+}
+
+function AddUser() {
+  return (
+    <form action={addUser} style={{ display: "flex", gap: 8 }}>
+      <TextField size="small" name="username" label="Username" required />
+      <TextField size="small" name="password" type="password" label="Password" required />
+      <Button type="submit" variant="contained">
+        Add User
+      </Button>
     </form>
   );
 }

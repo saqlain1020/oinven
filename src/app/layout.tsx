@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "src/config/theme";
+import { userExists } from "./actions/users";
 
 export const metadata: Metadata = {
   title: "Prime Tech",
@@ -17,7 +18,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  if (!session) redirect("auth/signin");
+  if (!session || !(await userExists(session.user.id))) redirect("/auth/signin");
   if (session)
     return (
       <html lang="en">
